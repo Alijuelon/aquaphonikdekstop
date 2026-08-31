@@ -69,6 +69,19 @@ function createWindow(): void {
     win.show()
   })
 
+  let isQuitting = false;
+
+  app.on('before-quit', () => {
+    isQuitting = true;
+  });
+
+  win.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      hideApp();
+    }
+  });
+
   win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
