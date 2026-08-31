@@ -462,13 +462,28 @@ function registerIpcHandlers(): void {
 // =====================================================
 // App Lifecycle
 // =====================================================
-app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.aquaphonik.desktop')
+const gotTheLock = app.requestSingleInstanceLock()
 
-  // DevTools shortcut
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    // Someone tried to run a second instance, we should focus our window.
+    // Import showApp dynamically or just use mainWindow
+    if (mainWindow) {
+      if (!mainWindow.isVisible()) mainWindow.show()
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
   })
+
+  app.whenReady().then(async () => {
+    electronApp.setAppUserModelId('com.aquaphonik.desktop')
+
+    // DevTools shortcut
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
 
   // Initialize database — MUST await so pool is ready before IPC handlers and window
   await initDatabase()
@@ -503,3 +518,5 @@ app.on('before-quit', () => {
   closeServer()
   closeDatabase()
 })
+
+} // Close else block for gotTheLock
