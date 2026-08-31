@@ -469,11 +469,13 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', () => {
     // Someone tried to run a second instance, we should focus our window.
-    // Import showApp dynamically or just use mainWindow
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
       if (!mainWindow.isVisible()) mainWindow.show()
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
+    } else {
+      // If window was somehow destroyed, recreate it
+      createWindow()
     }
   })
 
@@ -506,9 +508,8 @@ if (!gotTheLock) {
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // Do nothing. We want the app to stay alive in the background
+  // to keep reading sensors, saving to DB, and serving the API.
 })
 
 // Cleanup on quit
