@@ -6,7 +6,9 @@
 @tailwind utilities;
 
 /* =====================================================
-   AquaPhonik Desktop — Futuristic Glassmorphism Theme
+   AquaPhonik Desktop — Dual Theme (Light + Dark)
+   Dark  = class "dark" on <html>
+   Light = default (no class)
    ===================================================== */
 
 @layer base {
@@ -17,6 +19,15 @@
     --color-neon-cyan: #33eeff;
     --color-neon-amber: #ffbd33;
     --color-neon-red: #ff4d79;
+
+    /* Light mode glass tokens */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark {
+    /* Dark mode glass tokens */
     --glass-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.15);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -26,12 +37,18 @@
     @apply font-sans antialiased;
   }
 
+  /* Light mode body */
   body {
-    @apply bg-slate-950 text-white m-0 p-0 overflow-hidden;
+    @apply bg-slate-50 text-slate-800 m-0 p-0 overflow-hidden;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  /* Custom scrollbar — Futuristic */
+  /* Dark mode body */
+  .dark body {
+    @apply bg-slate-950 text-white;
+  }
+
+  /* Custom scrollbar — Light */
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -42,11 +59,20 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/20 rounded-full;
+    @apply bg-slate-300 rounded-full;
     transition: background 0.2s;
   }
 
   ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+
+  /* Custom scrollbar — Dark */
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-white/20;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
     @apply bg-white/40;
   }
 }
@@ -54,9 +80,15 @@
 @layer components {
   /* ===== Glassmorphism Cards ===== */
   .glass-card {
-    @apply bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] rounded-2xl;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    @apply backdrop-blur-xl rounded-2xl;
     transition: all 0.3s ease;
+  }
+
+  .dark .glass-card {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
   .glass-card-hover {
@@ -64,26 +96,43 @@
   }
 
   .glass-card-hover:hover {
+    @apply border-slate-300 bg-white/90;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+  }
+
+  .dark .glass-card-hover:hover {
     @apply border-white/20 bg-white/[0.1];
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 0 30px rgba(23, 181, 122, 0.08);
-    transform: translateY(-3px);
   }
 
   /* ===== Sensor value display ===== */
   .sensor-value {
     @apply text-4xl font-bold tracking-tight;
-    background: linear-gradient(135deg, #39ff14, #00e5ff);
+    background: linear-gradient(135deg, #0d9488, #0891b2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .sensor-value-sm {
-    @apply text-2xl font-bold tracking-tight;
+  .dark .sensor-value {
     background: linear-gradient(135deg, #39ff14, #00e5ff);
     -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .sensor-value-sm {
+    @apply text-2xl font-bold tracking-tight;
+    background: linear-gradient(135deg, #0d9488, #0891b2);
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .sensor-value-sm {
+    background: linear-gradient(135deg, #39ff14, #00e5ff);
+    -webkit-background-clip: text;
     background-clip: text;
   }
 
@@ -93,9 +142,14 @@
   }
 
   .status-dot-connected {
-    @apply status-dot bg-emerald-400;
-    box-shadow: 0 0 12px rgba(52, 211, 153, 0.8), 0 0 4px rgba(52, 211, 153, 0.4);
+    @apply status-dot bg-emerald-500;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     animation: neonPulse 2s ease-in-out infinite;
+  }
+
+  .dark .status-dot-connected {
+    @apply bg-emerald-400;
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.8), 0 0 4px rgba(52, 211, 153, 0.4);
   }
 
   .status-dot-disconnected {
@@ -106,16 +160,30 @@
   /* ===== Futuristic Toggle Switch ===== */
   .toggle-switch {
     @apply relative w-16 h-8 rounded-full cursor-pointer transition-all duration-500;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .toggle-switch {
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .toggle-switch-on {
     background: linear-gradient(135deg, rgba(23, 181, 122, 0.6), rgba(0, 229, 255, 0.4));
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .dark .toggle-switch-on {
     border-color: rgba(57, 255, 20, 0.4);
     box-shadow: 0 0 20px rgba(57, 255, 20, 0.3), inset 0 0 10px rgba(57, 255, 20, 0.1);
   }
 
   .toggle-switch-off {
+    @apply bg-slate-200;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .toggle-switch-off {
     @apply bg-white/10;
     border-color: rgba(255, 255, 255, 0.1);
   }
@@ -126,22 +194,40 @@
   }
 
   .toggle-switch-on .toggle-switch-knob {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+  }
+
+  .dark .toggle-switch-on .toggle-switch-knob {
     box-shadow: 0 0 12px rgba(57, 255, 20, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #39ff14, #00e5ff);
   }
 
   /* ===== Navigation ===== */
   .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/50 font-medium
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 font-medium
            transition-all duration-300 cursor-pointer;
   }
 
+  .dark .nav-item {
+    @apply text-white/50;
+  }
+
   .nav-item:hover {
+    @apply text-slate-700 bg-slate-100;
+  }
+
+  .dark .nav-item:hover {
     @apply text-white/80 bg-white/[0.06];
   }
 
   .nav-item-active {
-    @apply text-white bg-white/[0.1] border border-white/[0.15];
+    @apply text-slate-800 bg-slate-100 border border-slate-200;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .nav-item-active {
+    @apply text-white bg-white/[0.1] border-white/[0.15];
     box-shadow: 0 0 20px rgba(23, 181, 122, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
@@ -153,13 +239,25 @@
     transform: translateY(-50%);
     width: 3px;
     height: 60%;
-    background: linear-gradient(180deg, #39ff14, #00e5ff);
+    background: linear-gradient(180deg, #0d9488, #0891b2);
     border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 6px rgba(13, 148, 136, 0.4);
+  }
+
+  .dark .nav-item-active::before {
+    background: linear-gradient(180deg, #39ff14, #00e5ff);
     box-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
   }
 
   /* ===== Gradient text ===== */
   .text-gradient {
+    background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .text-gradient {
     background: linear-gradient(135deg, #39ff14 0%, #00e5ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -191,28 +289,44 @@
   /* ===== Floating sensor badge ===== */
   .sensor-badge {
     @apply relative;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
-    border: 1.5px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     transition: all 0.4s ease;
   }
 
+  .dark .sensor-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
   .sensor-badge:hover {
+    border-color: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+  }
+
+  .dark .sensor-badge:hover {
     border-color: rgba(255, 255, 255, 0.25);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 0 30px var(--badge-glow, rgba(23, 181, 122, 0.2));
-    transform: translateY(-4px);
   }
 
   /* ===== IoT connecting line ===== */
   .iot-line {
     position: absolute;
     height: 1.5px;
-    background: linear-gradient(90deg, rgba(57, 255, 20, 0.4), rgba(0, 229, 255, 0.1));
-    box-shadow: 0 0 6px rgba(57, 255, 20, 0.2);
+    background: linear-gradient(90deg, rgba(13, 148, 136, 0.3), rgba(8, 145, 178, 0.1));
+    box-shadow: 0 0 4px rgba(13, 148, 136, 0.15);
     transform-origin: left center;
     animation: iotPulse 3s ease-in-out infinite;
+  }
+
+  .dark .iot-line {
+    background: linear-gradient(90deg, rgba(57, 255, 20, 0.4), rgba(0, 229, 255, 0.1));
+    box-shadow: 0 0 6px rgba(57, 255, 20, 0.2);
   }
 }
 
@@ -303,5 +417,9 @@
 
 /* ===== ECharts gauge custom overrides ===== */
 .echarts-gauge-container {
+  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.15));
+}
+
+.dark .echarts-gauge-container {
   filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.15));
 }

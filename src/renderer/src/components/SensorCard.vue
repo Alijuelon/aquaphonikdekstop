@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useTheme } from '../composables/useTheme'
+
+const { isDarkMode } = useTheme()
 
 const props = defineProps<{
   title: string
@@ -23,15 +26,16 @@ const percentage = computed(() => {
 })
 
 function getGlowColor(accent?: string): string {
+  const alpha = isDarkMode.value ? '0.15' : '0.08'
   switch (accent) {
-    case 'aqua': return 'rgba(23, 181, 122, 0.15)'
-    case 'ocean': return 'rgba(54, 150, 252, 0.15)'
-    case 'amber': return 'rgba(245, 158, 11, 0.15)'
-    case 'rose': return 'rgba(244, 63, 94, 0.15)'
-    case 'violet': return 'rgba(139, 92, 246, 0.15)'
-    case 'cyan': return 'rgba(6, 182, 212, 0.15)'
-    case 'emerald': return 'rgba(16, 185, 129, 0.15)'
-    default: return 'rgba(23, 181, 122, 0.15)'
+    case 'aqua': return `rgba(23, 181, 122, ${alpha})`
+    case 'ocean': return `rgba(54, 150, 252, ${alpha})`
+    case 'amber': return `rgba(245, 158, 11, ${alpha})`
+    case 'rose': return `rgba(244, 63, 94, ${alpha})`
+    case 'violet': return `rgba(139, 92, 246, ${alpha})`
+    case 'cyan': return `rgba(6, 182, 212, ${alpha})`
+    case 'emerald': return `rgba(16, 185, 129, ${alpha})`
+    default: return `rgba(23, 181, 122, ${alpha})`
   }
 }
 </script>
@@ -51,13 +55,13 @@ function getGlowColor(accent?: string): string {
       <div
         class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
         :class="{
-          'bg-aqua-100/50 text-aqua-600 dark:bg-aqua-500/20 dark:text-aqua-400': accent === 'aqua',
-          'bg-ocean-100/50 text-ocean-600 dark:bg-ocean-500/20 dark:text-ocean-400': accent === 'ocean',
-          'bg-emerald-100/50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400': accent === 'emerald',
-          'bg-rose-100/50 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400': accent === 'rose',
-          'bg-amber-100/50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400': accent === 'amber',
-          'bg-violet-100/50 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400': accent === 'violet',
-          'bg-cyan-100/50 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400': accent === 'cyan'
+          'bg-aqua-500/20 text-aqua-500 dark:text-aqua-400': accent === 'aqua',
+          'bg-ocean-500/20 text-ocean-500 dark:text-ocean-400': accent === 'ocean',
+          'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400': accent === 'emerald',
+          'bg-rose-500/20 text-rose-600 dark:text-rose-400': accent === 'rose',
+          'bg-amber-500/20 text-amber-600 dark:text-amber-400': accent === 'amber',
+          'bg-violet-500/20 text-violet-600 dark:text-violet-400': accent === 'violet',
+          'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400': accent === 'cyan'
         }"
       >
         <!-- Thermometer -->
@@ -111,35 +115,37 @@ function getGlowColor(accent?: string): string {
         </svg>
       </div>
 
-      <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ title }}</span>
+      <span class="text-xs font-semibold uppercase tracking-wider"
+            :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">{{ title }}</span>
     </div>
 
     <!-- Value display -->
     <div class="flex items-baseline gap-1 relative z-10 mt-1">
       <span class="sensor-value">{{ formattedValue }}</span>
-      <span class="text-sm font-medium text-slate-500 dark:text-slate-500 ml-1">{{ unit }}</span>
+      <span class="text-sm font-medium ml-1" :class="isDarkMode ? 'text-slate-500' : 'text-slate-400'">{{ unit }}</span>
     </div>
 
     <!-- Progress bar (optional) -->
     <div v-if="min !== undefined && max !== undefined" class="mt-4 relative z-10">
-      <div class="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+      <div class="h-1.5 w-full rounded-full overflow-hidden"
+           :class="isDarkMode ? 'bg-slate-800' : 'bg-slate-200'">
         <div 
           class="h-full rounded-full transition-all duration-1000 ease-out"
           :class="{
-            'bg-gradient-to-r from-aqua-600 to-aqua-400 dark:from-aqua-500 dark:to-aqua-400': accent === 'aqua' || !accent,
-            'bg-gradient-to-r from-ocean-600 to-ocean-400 dark:from-ocean-500 dark:to-ocean-400': accent === 'ocean',
-            'bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-500 dark:to-emerald-400': accent === 'emerald',
-            'bg-gradient-to-r from-rose-600 to-rose-400 dark:from-rose-500 dark:to-rose-400': accent === 'rose',
-            'bg-gradient-to-r from-amber-600 to-amber-400 dark:from-amber-500 dark:to-amber-400': accent === 'amber',
-            'bg-gradient-to-r from-violet-600 to-violet-400 dark:from-violet-500 dark:to-violet-400': accent === 'violet',
-            'bg-gradient-to-r from-cyan-600 to-cyan-400 dark:from-cyan-500 dark:to-cyan-400': accent === 'cyan'
+            'bg-gradient-to-r from-aqua-600 to-aqua-400': accent === 'aqua' || !accent,
+            'bg-gradient-to-r from-ocean-600 to-ocean-400': accent === 'ocean',
+            'bg-gradient-to-r from-emerald-600 to-emerald-400': accent === 'emerald',
+            'bg-gradient-to-r from-rose-600 to-rose-400': accent === 'rose',
+            'bg-gradient-to-r from-amber-600 to-amber-400': accent === 'amber',
+            'bg-gradient-to-r from-violet-600 to-violet-400': accent === 'violet',
+            'bg-gradient-to-r from-cyan-600 to-cyan-400': accent === 'cyan'
           }"
           :style="{ width: `${percentage}%` }"
         ></div>
       </div>
       <div class="flex justify-between mt-1.5">
-        <span class="text-[10px] text-slate-500 dark:text-slate-600 font-medium">{{ min }}</span>
-        <span class="text-[10px] text-slate-500 dark:text-slate-600 font-medium">{{ max }}</span>
+        <span class="text-[10px] font-medium" :class="isDarkMode ? 'text-slate-600' : 'text-slate-400'">{{ min }}</span>
+        <span class="text-[10px] font-medium" :class="isDarkMode ? 'text-slate-600' : 'text-slate-400'">{{ max }}</span>
       </div>
     </div>
   </div>

@@ -32,8 +32,6 @@ import {
 } from './database'
 // Server: Modul komunikasi REST API dan Socket.IO dengan Flutter Mobile
 import { initServer, publishSensorData, closeServer } from './express-api'
-// Redis Cache: menyimpan data sensor real-time (TTL 1 jam) untuk stream mobile
-import { initRedisCache, closeRedisCache } from './redis-cache'
 // Power Manager: fitur ON/OFF tampilan aplikasi 
 import { initPowerManager, cleanupPowerManager, hideApp, isAppVisible } from './power-manager'
 
@@ -56,7 +54,10 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon, fullscreen: true, kiosk: true } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true
     }
   })
   mainWindow = win
@@ -459,9 +460,6 @@ app.whenReady().then(async () => {
   // Initialize database — MUST await so pool is ready before IPC handlers and window
   await initDatabase()
 
-  // Initialize Redis cache — untuk data real-time 1 jam yang dipakai stream mobile
-  await initRedisCache()
-
   // Initialize Server (Express + Socket.IO) untuk komunikasi dengan Flutter
   initServer()
 
@@ -491,5 +489,4 @@ app.on('before-quit', () => {
   serialCleanup()
   closeServer()
   closeDatabase()
-  closeRedisCache()
 })

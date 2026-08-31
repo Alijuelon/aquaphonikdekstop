@@ -64,11 +64,35 @@ const aquaphonikAPI = {
       return () => ipcRenderer.removeListener('serial:error', listener)
     },
 
-    /** Remove EVERY serial listener on all three channels */
+    /** Listen for auto-reconnect attempts. Returns an unsubscribe function. */
+    onReconnecting: (
+      callback: (info: { port: string; attempt: number; maxRetries: number }) => void
+    ): (() => void) => {
+      const listener = (
+        _event: unknown,
+        info: { port: string; attempt: number; maxRetries: number }
+      ): void => callback(info)
+      ipcRenderer.on('serial:reconnecting', listener)
+      return () => ipcRenderer.removeListener('serial:reconnecting', listener)
+    },
+
+    /** Listen for auto-reconnect failure (max retries reached). Returns an unsubscribe function. */
+    onReconnectFailed: (
+      callback: (info: { port: string; attempts: number }) => void
+    ): (() => void) => {
+      const listener = (_event: unknown, info: { port: string; attempts: number }): void =>
+        callback(info)
+      ipcRenderer.on('serial:reconnect-failed', listener)
+      return () => ipcRenderer.removeListener('serial:reconnect-failed', listener)
+    },
+
+    /** Remove EVERY serial listener on all channels */
     removeAllListeners: (): void => {
       ipcRenderer.removeAllListeners('serial:data')
       ipcRenderer.removeAllListeners('serial:status')
       ipcRenderer.removeAllListeners('serial:error')
+      ipcRenderer.removeAllListeners('serial:reconnecting')
+      ipcRenderer.removeAllListeners('serial:reconnect-failed')
     }
   },
 

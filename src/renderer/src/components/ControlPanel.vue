@@ -4,6 +4,9 @@
  * Sends serial commands to the microcontroller.
  */
 import { ref, watch } from 'vue'
+import { useTheme } from '../composables/useTheme'
+
+const { isDarkMode } = useTheme()
 
 const props = defineProps<{
   pumpStatus: boolean
@@ -42,37 +45,46 @@ function toggleOxygen(): void {
 </script>
 
 <template>
-  <div class="glass-card p-4 lg:p-5 xl:p-6 w-full transition-colors duration-300 bg-slate-900/80 border-2 border-white/20 shadow-2xl rounded-3xl backdrop-blur-xl flex flex-col">
-    <div class="flex items-center gap-3 mb-5 bg-white/10 p-3 rounded-xl w-fit border border-white/20">
-      <svg class="w-5 h-5 text-emerald-400 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  <div class="glass-card p-4 lg:p-5 xl:p-6 w-full transition-colors duration-300 border-2 shadow-2xl rounded-3xl backdrop-blur-xl flex flex-col"
+       :class="isDarkMode ? 'bg-slate-900/80 border-white/20' : 'bg-white/90 border-slate-200'">
+    <div class="flex items-center gap-3 mb-5 p-3 rounded-xl w-fit border"
+         :class="isDarkMode ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-200'">
+      <svg class="w-5 h-5 drop-shadow-md" :class="isDarkMode ? 'text-emerald-400' : 'text-emerald-500'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2.5">
         <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
         <line x1="8" y1="21" x2="16" y2="21" />
         <line x1="12" y1="17" x2="12" y2="21" />
       </svg>
-      <h2 class="text-xs lg:text-sm xl:text-base font-bold text-white uppercase tracking-wider">Control Panel</h2>
+      <h2 class="text-xs lg:text-sm xl:text-base font-bold uppercase tracking-wider"
+          :class="isDarkMode ? 'text-white' : 'text-slate-700'">Control Panel</h2>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3 lg:gap-5 xl:gap-6 w-full">
       <!-- Water Pump Control -->
       <div
         class="flex-1 flex items-center justify-between p-3 lg:p-4 xl:p-5 rounded-2xl border transition-all duration-300 shadow-lg hover:shadow-xl"
-        :class="pumpStatus ? 'bg-aqua-500/20 border-aqua-400/50' : 'bg-slate-800/80 border-white/20'">
+        :class="pumpStatus
+          ? 'bg-aqua-500/20 border-aqua-400/50'
+          : (isDarkMode ? 'bg-slate-800/80 border-white/20' : 'bg-slate-50 border-slate-200')">
         <div class="flex items-center gap-3 lg:gap-4 xl:gap-5">
           <div class="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-xl flex items-center justify-center transition-colors duration-300 shadow-inner border"
-            :class="pumpStatus ? 'bg-aqua-500/30 text-aqua-400 border-aqua-400/30' : 'bg-white/10 text-white/90 border-white/20'">
+            :class="pumpStatus
+              ? 'bg-aqua-500/30 text-aqua-400 border-aqua-400/30'
+              : (isDarkMode ? 'bg-white/10 text-white/90 border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200')">
             <svg class="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
             </svg>
           </div>
           <div>
-            <h3 class="text-sm lg:text-base xl:text-lg font-extrabold text-white transition-colors">Pompa Air</h3>
-            <p class="text-[10px] lg:text-xs xl:text-sm font-bold text-white/90 mt-0.5 uppercase tracking-wide">Sirkulasi air</p>
+            <h3 class="text-sm lg:text-base xl:text-lg font-extrabold transition-colors"
+                :class="isDarkMode ? 'text-white' : 'text-slate-800'">Pompa Air</h3>
+            <p class="text-[10px] lg:text-xs xl:text-sm font-bold mt-0.5 uppercase tracking-wide"
+               :class="isDarkMode ? 'text-white/90' : 'text-slate-500'">Sirkulasi air</p>
           </div>
         </div>
 
         <button class="relative inline-flex h-7 w-12 lg:h-8 lg:w-14 xl:h-10 xl:w-20 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-aqua-500/30 flex-shrink-0"
-          :class="pumpStatus ? 'bg-aqua-500 shadow-[0_0_15px_rgba(58,205,148,0.6)]' : 'bg-white/20'"
+          :class="pumpStatus ? 'bg-aqua-500 shadow-[0_0_15px_rgba(58,205,148,0.6)]' : (isDarkMode ? 'bg-white/20' : 'bg-slate-200')"
           :disabled="pumpLoading" @click="togglePump">
           <span v-if="pumpLoading" class="absolute inset-0 flex items-center justify-center">
             <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -85,22 +97,28 @@ function toggleOxygen(): void {
       <!-- Oxygen Pump Control -->
       <div
         class="flex-1 flex items-center justify-between p-3 lg:p-4 xl:p-5 rounded-2xl border transition-all duration-300 shadow-lg hover:shadow-xl"
-        :class="oxygenStatus ? 'bg-ocean-500/20 border-ocean-400/50' : 'bg-slate-800/80 border-white/20'">
+        :class="oxygenStatus
+          ? 'bg-ocean-500/20 border-ocean-400/50'
+          : (isDarkMode ? 'bg-slate-800/80 border-white/20' : 'bg-slate-50 border-slate-200')">
         <div class="flex items-center gap-3 lg:gap-4 xl:gap-5">
           <div class="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-xl flex items-center justify-center transition-colors duration-300 shadow-inner border"
-            :class="oxygenStatus ? 'bg-ocean-500/30 text-ocean-400 border-ocean-400/30' : 'bg-white/10 text-white/90 border-white/20'">
+            :class="oxygenStatus
+              ? 'bg-ocean-500/30 text-ocean-400 border-ocean-400/30'
+              : (isDarkMode ? 'bg-white/10 text-white/90 border-white/20' : 'bg-slate-100 text-slate-500 border-slate-200')">
             <svg class="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" stroke-linecap="round"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-sm lg:text-base xl:text-lg font-extrabold text-white transition-colors">Pompa O²</h3>
-            <p class="text-[10px] lg:text-xs xl:text-sm font-bold text-white/90 mt-0.5 uppercase tracking-wide">Aerasi kolam</p>
+            <h3 class="text-sm lg:text-base xl:text-lg font-extrabold transition-colors"
+                :class="isDarkMode ? 'text-white' : 'text-slate-800'">Pompa O²</h3>
+            <p class="text-[10px] lg:text-xs xl:text-sm font-bold mt-0.5 uppercase tracking-wide"
+               :class="isDarkMode ? 'text-white/90' : 'text-slate-500'">Aerasi kolam</p>
           </div>
         </div>
 
         <button class="relative inline-flex h-7 w-12 lg:h-8 lg:w-14 xl:h-10 xl:w-20 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-ocean-500/30 flex-shrink-0"
-          :class="oxygenStatus ? 'bg-ocean-500 shadow-[0_0_15px_rgba(54,150,252,0.6)]' : 'bg-white/20'"
+          :class="oxygenStatus ? 'bg-ocean-500 shadow-[0_0_15px_rgba(54,150,252,0.6)]' : (isDarkMode ? 'bg-white/20' : 'bg-slate-200')"
           :disabled="oxyLoading" @click="toggleOxygen">
           <span v-if="oxyLoading" class="absolute inset-0 flex items-center justify-center">
             <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>

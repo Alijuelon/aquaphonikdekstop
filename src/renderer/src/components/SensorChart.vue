@@ -2,6 +2,7 @@
 /**
  * SensorChart — Real-time line chart for sensor data trends
  * Uses Chart.js with vue-chartjs for rendering.
+ * Supports Light/Dark theme.
  */
 import { computed, ref } from 'vue'
 import { Line } from 'vue-chartjs'
@@ -16,9 +17,12 @@ import {
   Legend,
   Filler
 } from 'chart.js'
+import { useTheme } from '../composables/useTheme'
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
+
+const { isDarkMode } = useTheme()
 
 const props = defineProps<{
   labels: string[]
@@ -55,14 +59,14 @@ const chartData = computed(() => ({
       pointRadius: 0,
       pointHoverRadius: 6,
       pointHoverBackgroundColor: ds.color,
-      pointHoverBorderColor: '#fff',
+      pointHoverBorderColor: isDarkMode.value ? '#fff' : '#1e293b',
       pointHoverBorderWidth: 3,
       tension: 0.4,
       fill: true
     }))
 }))
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
@@ -74,10 +78,10 @@ const chartOptions = {
       display: false
     },
     tooltip: {
-      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-      titleColor: '#f8fafc',
-      bodyColor: '#cbd5e1',
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: isDarkMode.value ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: isDarkMode.value ? '#f8fafc' : '#1e293b',
+      bodyColor: isDarkMode.value ? '#cbd5e1' : '#475569',
+      borderColor: isDarkMode.value ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
       borderWidth: 1,
       cornerRadius: 8,
       padding: 16,
@@ -96,11 +100,11 @@ const chartOptions = {
   scales: {
     x: {
       grid: {
-        color: 'rgba(255, 255, 255, 0.15)',
+        color: isDarkMode.value ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.06)',
         drawBorder: false
       },
       ticks: {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: isDarkMode.value ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)',
         font: {
           family: 'Inter',
           size: 13,
@@ -111,11 +115,11 @@ const chartOptions = {
     },
     y: {
       grid: {
-        color: 'rgba(255, 255, 255, 0.15)',
+        color: isDarkMode.value ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.06)',
         drawBorder: false
       },
       ticks: {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: isDarkMode.value ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)',
         font: {
           family: 'Inter',
           size: 13,
@@ -127,20 +131,23 @@ const chartOptions = {
   animation: {
     duration: 300
   }
-}
+}))
 </script>
 
 <template>
   <div class="chart-container flex flex-col h-full">
     <!-- Chart title & legend -->
     <div class="flex items-center justify-between mb-6">
-      <h3 class="text-base font-bold text-white uppercase tracking-widest transition-colors">
+      <h3 class="text-base font-bold uppercase tracking-widest transition-colors"
+          :class="isDarkMode ? 'text-white' : 'text-slate-700'">
         {{ title || 'Sensor Trends' }}
       </h3>
       <div class="flex flex-wrap items-center gap-2 md:gap-3">
         <button v-for="(ds, index) in datasets" :key="ds.label"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300 border border-white/10"
-          :class="activeDatasets.has(index) ? 'bg-white/20 text-white shadow-md' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300 border"
+          :class="activeDatasets.has(index)
+            ? (isDarkMode ? 'bg-white/20 text-white shadow-md border-white/10' : 'bg-slate-100 text-slate-700 shadow-sm border-slate-200')
+            : (isDarkMode ? 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border-white/10' : 'bg-white/60 text-slate-400 hover:text-slate-600 hover:bg-slate-50 border-slate-200')"
           @click="toggleDataset(index)">
           <span class="w-3 h-3 rounded-full shadow-inner"
             :style="{ backgroundColor: ds.color, opacity: activeDatasets.has(index) ? 1 : 0.3 }"></span>

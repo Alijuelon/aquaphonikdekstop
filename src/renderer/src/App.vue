@@ -2,15 +2,17 @@
 /**
  * App.vue — Root component
  * Layout: Immersive fullscreen BG + Sidebar + Header + RouterView
- * Theme: Futuristic Glassmorphism with real-world aquaponics background
+ * Theme: Futuristic Glassmorphism with Light/Dark mode support
  */
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import { useRoute } from 'vue-router'
 import { computed, ref } from 'vue'
+import { useTheme } from './composables/useTheme'
 import bgImage from './assets/bg-aquaponics.png'
 
 const route = useRoute()
+const { isDarkMode } = useTheme()
 
 const pageTitle = computed(() => {
   return (route.meta?.title as string) || 'Dashboard'
@@ -25,14 +27,16 @@ function toggleSidebar(): void {
 </script>
 
 <template>
-  <div class="relative h-screen w-screen overflow-hidden text-white">
+  <div class="relative h-screen w-screen overflow-hidden transition-colors duration-500"
+       :class="isDarkMode ? 'text-white' : 'text-slate-800'">
     <!-- Immersive Fullscreen Background -->
     <div
       class="absolute inset-0 bg-cover bg-center bg-no-repeat"
       :style="{ backgroundImage: `url(${bgImage})` }"
     >
-      <!-- Dark overlay for readability in outdoor environment -->
-      <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"></div>
+      <!-- Overlay — lighter for light mode, darker for dark mode -->
+      <div class="absolute inset-0 transition-colors duration-500"
+           :class="isDarkMode ? 'bg-slate-950/40 backdrop-blur-sm' : 'bg-white/60 backdrop-blur-sm'"></div>
     </div>
 
     <!-- Main Layout (over background) -->
@@ -56,7 +60,9 @@ function toggleSidebar(): void {
           <button
             @click="toggleSidebar"
             class="absolute bottom-4 right-6 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg border backdrop-blur-md"
-            :class="showSidebar ? 'bg-white/10 text-white/50 border-white/10 hover:bg-white/20 hover:text-white' : 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/30 shadow-[0_0_15px_rgba(51,238,255,0.3)] hover:bg-neon-cyan/30'"
+            :class="isDarkMode
+              ? (showSidebar ? 'bg-white/10 text-white/50 border-white/10 hover:bg-white/20 hover:text-white' : 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/30 shadow-[0_0_15px_rgba(51,238,255,0.3)] hover:bg-neon-cyan/30')
+              : (showSidebar ? 'bg-white/80 text-slate-400 border-slate-200 hover:bg-white hover:text-slate-600' : 'bg-teal-500/20 text-teal-600 border-teal-300 shadow-md hover:bg-teal-500/30')"
             :title="showSidebar ? 'Sembunyikan Navigasi' : 'Tampilkan Navigasi'"
           >
             <!-- Chevron Down when shown -->
@@ -77,8 +83,10 @@ function toggleSidebar(): void {
       </transition>
     </div>
 
-    <!-- Ambient glow particles (decorative) -->
-    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-aqua-500/10 rounded-full blur-3xl animate-pulse-slow pointer-events-none"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-ocean-500/10 rounded-full blur-3xl animate-pulse-slow pointer-events-none" style="animation-delay: 1s;"></div>
+    <!-- Ambient glow particles (decorative) — more subtle in light mode -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse-slow pointer-events-none transition-colors duration-500"
+         :class="isDarkMode ? 'bg-aqua-500/10' : 'bg-teal-400/5'"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl animate-pulse-slow pointer-events-none transition-colors duration-500" style="animation-delay: 1s;"
+         :class="isDarkMode ? 'bg-ocean-500/10' : 'bg-cyan-400/5'"></div>
   </div>
 </template>

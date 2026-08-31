@@ -8,7 +8,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         // Externalize native modules — they can't be bundled
-        external: ['serialport', 'better-sqlite3', '@serialport/parser-readline']
+        external: ['serialport', '@serialport/parser-readline']
       }
     }
   },

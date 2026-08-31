@@ -17,6 +17,10 @@ interface SerialAPI {
   onData: (callback: (data: Record<string, number>) => void) => () => void
   onStatusChange: (callback: (status: { connected: boolean; port: string }) => void) => () => void
   onError: (callback: (error: { message: string }) => void) => () => void
+  onReconnecting: (
+    callback: (info: { port: string; attempt: number; maxRetries: number }) => void
+  ) => () => void
+  onReconnectFailed: (callback: (info: { port: string; attempts: number }) => void) => () => void
   removeAllListeners: () => void
 }
 

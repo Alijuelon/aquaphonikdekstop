@@ -1,7 +1,7 @@
 /**
  * Power Manager — Aquaphonik Desktop
  * Mengelola fitur ON/OFF TAMPILAN aplikasi desktop TANPA menghentikan proses
- * di baliknya (pembacaan serial, kalibrasi, logging ke PostgreSQL, server
+ * di baliknya (pembacaan serial, kalibrasi, logging ke database, server
  * Express/Socket.IO untuk aplikasi mobile).
  */
 

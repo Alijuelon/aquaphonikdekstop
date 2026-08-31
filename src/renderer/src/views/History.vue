@@ -5,6 +5,9 @@
  * Supports filtering by date range and export to Excel.
  */
 import { ref, onMounted, computed } from 'vue'
+import { useTheme } from '../composables/useTheme'
+
+const { isDarkMode } = useTheme()
 
 interface LogEntry {
   id: number
@@ -154,32 +157,37 @@ async function exportToExcel(): Promise<void> {
     <!-- Header removed, handled by Top Nav -->
 
     <!-- Filters -->
-    <div class="glass-card p-5 flex flex-wrap items-end gap-5 bg-black/40 border border-white/10 shadow-2xl backdrop-blur-md rounded-3xl">
+    <div class="glass-card p-5 flex flex-wrap items-end gap-5 border shadow-2xl backdrop-blur-md rounded-3xl"
+         :class="isDarkMode ? 'bg-black/40 border-white/10' : 'bg-white/80 border-slate-200'">
       <div class="flex flex-col gap-1.5 w-full sm:w-auto">
-        <label class="text-sm font-bold text-white uppercase tracking-wider">Dari Tanggal</label>
+        <label class="text-sm font-bold uppercase tracking-wider" :class="isDarkMode ? 'text-white' : 'text-slate-700'">Dari Tanggal</label>
         <input v-model="startDate" type="date"
-          class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-black/40 border border-white/30 text-base font-medium text-white shadow-inner outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/30 transition-all" />
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl border text-base font-medium shadow-inner outline-none focus:ring-2 transition-all"
+          :class="isDarkMode ? 'bg-black/40 border-white/30 text-white focus:border-neon-cyan focus:ring-neon-cyan/30' : 'bg-white border-slate-300 text-slate-800 focus:border-teal-500 focus:ring-teal-500/30'" />
       </div>
       <div class="flex flex-col gap-1.5 w-full sm:w-auto">
-        <label class="text-sm font-bold text-white uppercase tracking-wider">Sampai Tanggal</label>
+        <label class="text-sm font-bold uppercase tracking-wider" :class="isDarkMode ? 'text-white' : 'text-slate-700'">Sampai Tanggal</label>
         <input v-model="endDate" type="date"
-          class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-black/40 border border-white/30 text-base font-medium text-white shadow-inner outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/30 transition-all" />
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl border text-base font-medium shadow-inner outline-none focus:ring-2 transition-all"
+          :class="isDarkMode ? 'bg-black/40 border-white/30 text-white focus:border-neon-cyan focus:ring-neon-cyan/30' : 'bg-white border-slate-300 text-slate-800 focus:border-teal-500 focus:ring-teal-500/30'" />
       </div>
       <div class="flex gap-3 w-full sm:w-auto">
-        <button @click="loadByDateRange" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-neon-blue to-neon-cyan border border-white/20 shadow-[0_0_15px_rgba(51,238,255,0.4)] hover:shadow-[0_0_25px_rgba(51,238,255,0.6)] transition-all">
+        <button @click="loadByDateRange" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-neon-blue to-neon-cyan border border-white/20 shadow-lg hover:shadow-xl transition-all">
           Filter
         </button>
         <button @click="loadLatestLogs"
-          class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-bold text-white bg-white/10 border border-white/30 hover:bg-white/20 transition-all shadow-md">
+          class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-bold border transition-all shadow-md"
+          :class="isDarkMode ? 'text-white bg-white/10 border-white/30 hover:bg-white/20' : 'text-slate-700 bg-slate-100 border-slate-200 hover:bg-slate-200'">
           Latest {{ limit }}
         </button>
       </div>
 
       <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto lg:ml-auto">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-          <label class="text-sm font-bold text-white uppercase tracking-wider">Show:</label>
+          <label class="text-sm font-bold uppercase tracking-wider" :class="isDarkMode ? 'text-white' : 'text-slate-700'">Show:</label>
           <select v-model="limit"
-            class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-black/40 border border-white/30 text-base font-medium text-white shadow-inner outline-none focus:border-neon-cyan"
+            class="flex-1 sm:flex-none px-3 py-2 rounded-xl border text-base font-medium shadow-inner outline-none transition-all"
+            :class="isDarkMode ? 'bg-black/40 border-white/30 text-white focus:border-neon-cyan' : 'bg-white border-slate-300 text-slate-800 focus:border-teal-500'"
             @change="loadLatestLogs">
             <option :value="25">25</option>
             <option :value="50">50</option>
@@ -247,7 +255,8 @@ async function exportToExcel(): Promise<void> {
     </Transition>
 
     <!-- Data info bar -->
-    <div class="flex items-center justify-between px-5 py-3 rounded-2xl bg-black/20 border border-white/5">
+    <div class="flex items-center justify-between px-5 py-3 rounded-2xl border"
+         :class="isDarkMode ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-200'">
       <div class="flex items-center gap-3">
         <!-- Database status icon -->
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -258,22 +267,23 @@ async function exportToExcel(): Promise<void> {
           </svg>
           <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Database</span>
         </div>
-        <span class="text-xs text-white/50">
-          Menampilkan <span class="font-bold text-white/80">{{ logs.length }}</span> data
-          <span v-if="totalCount > 0"> dari <span class="font-bold text-white/80">{{ totalCount }}</span> total</span>
+        <span class="text-xs" :class="isDarkMode ? 'text-white/50' : 'text-slate-500'">
+          Menampilkan <span class="font-bold" :class="isDarkMode ? 'text-white/80' : 'text-slate-700'">{{ logs.length }}</span> data
+          <span v-if="totalCount > 0"> dari <span class="font-bold" :class="isDarkMode ? 'text-white/80' : 'text-slate-700'">{{ totalCount }}</span> total</span>
         </span>
       </div>
-      <span class="text-[10px] text-white/30 italic">
+      <span class="text-[10px] italic" :class="isDarkMode ? 'text-white/30' : 'text-slate-400'">
         Data tersimpan di database — tersedia tanpa koneksi USB
       </span>
     </div>
 
     <!-- Table -->
-    <div class="glass-card overflow-hidden bg-black/40 border border-white/10 shadow-2xl rounded-3xl backdrop-blur-md">
+    <div class="glass-card overflow-hidden border shadow-2xl rounded-3xl backdrop-blur-md"
+         :class="isDarkMode ? 'bg-black/40 border-white/10' : 'bg-white/80 border-slate-200'">
       <!-- Loading -->
       <div v-if="isLoading" class="p-12 text-center">
         <div class="w-10 h-10 mx-auto border-4 border-neon-cyan border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-base font-bold text-white mt-4 tracking-wide">Memuat data...</p>
+        <p class="text-base font-bold mt-4 tracking-wide" :class="isDarkMode ? 'text-white' : 'text-slate-700'">Memuat data...</p>
       </div>
 
       <!-- Database error state -->
@@ -309,34 +319,36 @@ async function exportToExcel(): Promise<void> {
       <div v-else class="overflow-x-auto">
         <table class="w-full text-base">
           <thead>
-            <tr class="bg-black/40 border-b border-white/30">
-              <th class="text-left px-5 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Waktu</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Suhu Air</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">pH</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">TDS</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">DO</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Turb.</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Level</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Suhu Udara</th>
-              <th class="text-right px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Hum.</th>
-              <th class="text-center px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest border-r border-white/10">Pompa</th>
-              <th class="text-center px-4 py-4 text-sm font-extrabold text-white uppercase tracking-widest">O₂</th>
+            <tr class="border-b" :class="isDarkMode ? 'bg-black/40 border-white/30' : 'bg-slate-50 border-slate-200'">
+              <th class="text-left px-5 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Waktu</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Suhu Air</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">pH</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">TDS</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">DO</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Turb.</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Level</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Suhu Udara</th>
+              <th class="text-right px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Hum.</th>
+              <th class="text-center px-4 py-4 text-sm font-extrabold uppercase tracking-widest border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-700 border-slate-200'">Pompa</th>
+              <th class="text-center px-4 py-4 text-sm font-extrabold uppercase tracking-widest" :class="isDarkMode ? 'text-white' : 'text-slate-700'">O₂</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="log in formattedLogs" :key="log.id"
-              class="border-b border-white/10 hover:bg-white/20 transition-colors duration-200">
-              <td class="px-5 py-3.5 text-white font-mono font-bold text-sm whitespace-nowrap border-r border-white/10 bg-black/20">
+              class="border-b transition-colors duration-200"
+              :class="isDarkMode ? 'border-white/10 hover:bg-white/20' : 'border-slate-100 hover:bg-slate-50'">
+              <td class="px-5 py-3.5 font-mono font-bold text-sm whitespace-nowrap border-r"
+                  :class="isDarkMode ? 'text-white border-white/10 bg-black/20' : 'text-slate-700 border-slate-100 bg-slate-50/50'">
                 {{ log.formattedTime }}
               </td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.temp_water.toFixed(1) }}°C</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.ph.toFixed(1) }}</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.tds.toFixed(0) }}</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.do_value.toFixed(0) }}</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.turbidity.toFixed(0) }}</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.water_lvl.toFixed(1) }}</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.temp_air.toFixed(1) }}°C</td>
-              <td class="text-right px-4 py-3.5 text-white font-bold drop-shadow-md border-r border-white/10">{{ log.humidity.toFixed(1) }}%</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.temp_water.toFixed(1) }}°C</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.ph.toFixed(1) }}</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.tds.toFixed(0) }}</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.do_value.toFixed(0) }}</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.turbidity.toFixed(0) }}</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.water_lvl.toFixed(1) }}</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.temp_air.toFixed(1) }}°C</td>
+              <td class="text-right px-4 py-3.5 font-bold drop-shadow-md border-r" :class="isDarkMode ? 'text-white border-white/10' : 'text-slate-800 border-slate-100'">{{ log.humidity.toFixed(1) }}%</td>
               <td class="text-center px-4 py-3.5 border-r border-white/10">
                 <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold tracking-wider border" :class="log.pump_status
                     ? 'bg-aqua-500/30 text-aqua-300 border-aqua-400/50 shadow-[0_0_10px_rgba(58,205,148,0.5)]'
