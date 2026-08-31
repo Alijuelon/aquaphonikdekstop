@@ -11,23 +11,6 @@ import { useTheme } from '../composables/useTheme'
 const { isConnected, currentPort } = useSerial()
 const { lastUpdateFormatted, dataReceived } = useSensorData()
 const { isDarkMode, toggleTheme } = useTheme()
-const isPoweringOff = ref(false)
-
-/**
- * Matikan tampilan aplikasi. Konfirmasi ditampilkan oleh main process
- * (native dialog) supaya tidak sengaja tertekan di layar sentuh.
- * Proses background (serial, database, server mobile) tetap berjalan;
- * nyalakan kembali lewat saklar fisik, ikon tray, atau Ctrl+Alt+P.
- */
-async function handlePowerOff(): Promise<void> {
-  if (isPoweringOff.value) return
-  isPoweringOff.value = true
-  try {
-    await window.api.power.turnOff()
-  } finally {
-    isPoweringOff.value = false
-  }
-}
 
 const networkIP = ref<string | null>(null)
 const networkIface = ref<string | null>(null)
@@ -58,10 +41,6 @@ onUnmounted(() => {
 })
 
 // Window Controls
-async function handleMinimize(): Promise<void> {
-  await window.api.windowControls.minimize()
-}
-
 async function handleClose(): Promise<void> {
   await window.api.windowControls.close()
 }
@@ -159,21 +138,6 @@ async function handleClose(): Promise<void> {
         </svg>
       </button>
 
-      <!-- Power ON/OFF (matikan tampilan aplikasi, proses background tetap berjalan) -->
-      <button
-        @click="handlePowerOff"
-        :disabled="isPoweringOff"
-        class="flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-        :class="isDarkMode
-          ? 'bg-black/40 border-white/10 text-neon-green/70 hover:text-white hover:bg-neon-green/20 hover:border-neon-green/40 hover:shadow-[0_0_15px_rgba(57,255,20,0.4)]'
-          : 'bg-white/80 border-slate-200 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-sm'"
-        title="Matikan Tampilan Aplikasi (proses background tetap berjalan)"
-      >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
-          <line x1="12" y1="2" x2="12" y2="12" />
-        </svg>
-      </button>
 
       <!-- Status dot -->
       <div class="flex items-center gap-2 ml-1">
@@ -193,25 +157,14 @@ async function handleClose(): Promise<void> {
       <!-- Window Controls -->
       <div class="flex items-center gap-1.5 ml-2 pl-3 border-l-2"
            :class="isDarkMode ? 'border-white/10' : 'border-slate-200'">
-        <button
-          @click="handleMinimize"
-          class="flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-200"
-          :class="isDarkMode
-            ? 'bg-black/40 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
-            : 'bg-white/80 border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-100 shadow-sm'"
-          title="Minimize"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
+
         <button
           @click="handleClose"
           class="flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-200"
           :class="isDarkMode
             ? 'bg-black/40 border-white/10 text-white/60 hover:text-white hover:bg-neon-red/80 hover:border-neon-red/50 hover:shadow-[0_0_15px_rgba(255,23,68,0.5)]'
             : 'bg-white/80 border-slate-200 text-slate-400 hover:text-white hover:bg-red-500 hover:border-red-400 shadow-sm'"
-          title="Exit"
+          title="Tutup & Sembunyikan (Background Tetap Jalan)"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />

@@ -204,7 +204,7 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('window:close', () => {
-    app.quit()
+    hideApp()
   })
 
   // ----- Power (ON/OFF Tampilan Aplikasi) Handler -----
