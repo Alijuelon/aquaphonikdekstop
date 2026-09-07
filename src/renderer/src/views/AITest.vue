@@ -52,7 +52,8 @@ async function testPrediction() {
     const data = await response.json()
     result.value = data
   } catch (err: any) {
-    errorMsg.value = err.message || 'Gagal terhubung ke API. Pastikan IP dan Port sudah benar.'
+    console.error("FULL FETCH ERROR:", err);
+    errorMsg.value = `DEBUG INFO: URL=${apiUrl.value} | Type=${err.name} | Msg=${err.message} | Cause=${err.cause || 'N/A'}`;
   } finally {
     isLoading.value = false
   }
