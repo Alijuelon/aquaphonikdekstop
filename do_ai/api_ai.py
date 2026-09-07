@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import warnings
 from sklearn.exceptions import InconsistentVersionWarning
 
@@ -8,6 +9,7 @@ from sklearn.exceptions import InconsistentVersionWarning
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 app = Flask(__name__)
+CORS(app)
 
 import os
 import sys

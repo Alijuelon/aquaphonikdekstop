@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useTheme } from '../composables/useTheme'
 
 const { isDarkMode } = useTheme()
 
-const apiUrl = ref('http://192.168.0.175:5001/predict')
+const apiUrl = ref('http://127.0.0.1:5001/predict')
 const temp = ref<number>(25.0)
 const ph = ref<number>(7.0)
 const tds = ref<number>(300)
@@ -13,6 +13,25 @@ const turbidity = ref<number>(5.0)
 const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
+
+let removeListener: (() => void) | null = null
+
+onMounted(() => {
+  // @ts-ignore
+  if (window.api && window.api.serial) {
+    // @ts-ignore
+    removeListener = window.api.serial.onData((data: any) => {
+      if (data.temp_water !== undefined) temp.value = data.temp_water
+      if (data.ph !== undefined) ph.value = data.ph
+      if (data.tds !== undefined) tds.value = data.tds
+      if (data.turbidity !== undefined) turbidity.value = data.turbidity
+    })
+  }
+})
+
+onUnmounted(() => {
+  if (removeListener) removeListener()
+})
 
 async function testPrediction() {
   isLoading.value = true
