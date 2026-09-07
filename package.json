@@ -13,7 +13,7 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "dev:electron": "electron-vite dev -- --no-sandbox",
-    "dev:ai": "cd do_ai && (./env/bin/python api_ai.py || python3 api_ai.py || echo 'AI Server tidak bisa berjalan lokal')",
+    "dev:ai": "cd do_ai && (./env/bin/python api_ai.py || ./build_venv/bin/python api_ai.py || python3 api_ai.py || echo 'AI Server tidak bisa berjalan lokal')",
     "dev": "electron-vite dev -- --no-sandbox",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
