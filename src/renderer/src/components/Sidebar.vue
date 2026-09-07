@@ -21,7 +21,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'dashboard', path: '/', icon: 'dashboard', label: 'Dashboard' },
   { name: 'history', path: '/history', icon: 'history', label: 'History' },
-  { name: 'settings', path: '/settings', icon: 'settings', label: 'Settings' }
+  { name: 'settings', path: '/settings', icon: 'settings', label: 'Settings' },
+  { name: 'ai-test', path: '/ai-test', icon: 'science', label: 'AI Test' }
 ]
 
 const currentRoute = computed(() => route.name)
@@ -85,6 +86,16 @@ function navigateTo(path: string): void {
                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <svg v-else-if="item.icon === 'science'" class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0"
+               :class="currentRoute === item.name ? (isDarkMode ? 'text-neon-cyan drop-shadow-md' : 'text-cyan-600') : (isDarkMode ? 'text-white' : 'text-slate-500')"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2v2"></path>
+            <path d="M15 2v2"></path>
+            <path d="M12 2v2"></path>
+            <path d="M4.5 19l4.5-9V4h6v6l4.5 9"></path>
+            <path d="M4.5 19c.4 1 1.6 2 3.5 2h8c2 0 3-1 3.5-2"></path>
+            <path d="M12 11h.01"></path>
           </svg>
         </div>
         <span class="relative z-10 text-[9px] md:text-[10px] font-bold tracking-wide"

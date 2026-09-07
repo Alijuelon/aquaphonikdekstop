@@ -21,6 +21,12 @@ const router = createRouter({
       name: 'settings',
       component: () => import('../views/Settings.vue'),
       meta: { title: 'Settings', icon: 'settings' }
+    },
+    {
+      path: '/ai-test',
+      name: 'ai-test',
+      component: () => import('../views/AITest.vue'),
+      meta: { title: 'AI Test', icon: 'science' }
     }
   ]
 })
