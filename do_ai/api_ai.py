@@ -106,4 +106,4 @@ def predict():
 
 if __name__ == '__main__':
     # Flask berjalan di port 5000 secara default
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5001, debug=False)
