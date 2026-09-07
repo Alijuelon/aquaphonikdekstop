@@ -177,6 +177,12 @@ const aquaphonikAPI = {
   power: {
     turnOff: (): Promise<{ success: boolean }> => ipcRenderer.invoke('power:turn-off'),
     getState: (): Promise<{ visible: boolean }> => ipcRenderer.invoke('power:get-state')
+  },
+
+  // ---- AI Predict (Bypass CORS) ----
+  ai: {
+    predict: (url: string, payload: any): Promise<{ success: boolean; data?: any; error?: string }> =>
+      ipcRenderer.invoke('ai:predict', url, payload)
   }
 }
 

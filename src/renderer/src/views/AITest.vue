@@ -32,25 +32,20 @@ async function testPrediction() {
   errorMsg.value = ''
   
   try {
-    const response = await fetch(apiUrl.value, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        temp_water: temp.value,
-        ph: ph.value,
-        tds: tds.value,
-        turbidity: turbidity.value
-      })
+    // Memanggil fetch melalui Main Process Node.js untuk membypass keamanan Electron/Browser (CORS dll)
+    // @ts-ignore
+    const res = await window.api.ai.predict(apiUrl.value, {
+      temp_water: temp.value,
+      ph: ph.value,
+      tds: tds.value,
+      turbidity: turbidity.value
     })
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    if (!res.success) {
+      throw new Error(res.error)
     }
     
-    const data = await response.json()
-    result.value = data
+    result.value = res.data
   } catch (err: any) {
     console.error("FULL FETCH ERROR:", err);
     errorMsg.value = `DEBUG INFO: URL=${apiUrl.value} | Type=${err.name} | Msg=${err.message} | Cause=${err.cause || 'N/A'}`;

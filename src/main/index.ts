@@ -126,6 +126,25 @@ function registerIpcHandlers(): void {
     return getStatus()
   })
 
+  // ----- AI Predict Handler -----
+  ipcMain.handle('ai:predict', async (_event, url: string, payload: any) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        return { success: false, error: `Server Error: HTTP ${response.status} ${response.statusText}` };
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (err: any) {
+      // Node.js will provide exact network errors here (e.g. ECONNREFUSED)
+      return { success: false, error: err.message || err.toString() };
+    }
+  })
+
   // ----- Database Handlers -----
 
   // Get latest sensor logs
