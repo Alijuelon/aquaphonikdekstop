@@ -83,6 +83,18 @@ def predict():
         status_msg = "Di bawah batas kritis (< 5.0 mg/L)!" if hasil_prediksi < 5.0 else "Kondisi Oksigen Normal."
         is_critical = bool(hasil_prediksi < 5.0)
 
+        # Print ke terminal (console)
+        print("\n" + "="*40)
+        print(f"📡 DATA SENSOR MASUK:")
+        print(f"   - Suhu Air : {sample_temp} °C")
+        print(f"   - pH       : {sample_ph}")
+        print(f"   - TDS      : {sample_tds} ppm")
+        print(f"   - Turbidity: {sample_turbidity} NTU")
+        print(f"🤖 HASIL PREDIKSI AI:")
+        print(f"   - DO       : {round(float(hasil_prediksi), 2)} mg/L")
+        print(f"   - Status   : {status_msg}")
+        print("="*40 + "\n")
+
         # Kembalikan response JSON
         return jsonify({
             "status": "success",
