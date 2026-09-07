@@ -9,10 +9,22 @@ warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 app = Flask(__name__)
 
+import os
+import sys
+
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-MODEL_PATH = 'virtual_sensor_do_gabungan.pkl'
+def get_resource_path(relative_path):
+    """ Dapatkan path absolut, mendukung mode normal maupun PyInstaller """
+    try:
+        # PyInstaller membuat folder temp pada sys._MEIPASS saat runtime
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
+MODEL_PATH = get_resource_path('virtual_sensor_do_gabungan.pkl')
 
 # ==============================================================================
 # ML MODEL SETUP
