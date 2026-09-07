@@ -14,7 +14,7 @@
     "start": "electron-vite preview",
     "dev:electron": "electron-vite dev -- --no-sandbox",
     "dev:ai": "cd do_ai && (./env/bin/python api_ai.py || python3 api_ai.py || echo 'AI Server tidak bisa berjalan lokal')",
-    "dev": "concurrently \"npm run dev:electron\" \"npm run dev:ai\"",
+    "dev": "electron-vite dev -- --no-sandbox",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
