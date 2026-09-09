@@ -50,7 +50,7 @@ async function testPrediction() {
       ph: sensorData.value.ph,
       tds: sensorData.value.tds,
       turbidity: sensorData.value.turbidity,
-      do_predict: res.data.do_prediction,
+      do_predict: res.data.data.do_prediction,
       do_real: sensorData.value.do
     })
 
