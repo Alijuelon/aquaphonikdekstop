@@ -1,18 +1,12 @@
-<script lang="ts">
-import { ref, computed } from 'vue'
-
-// Deklarasikan di luar script setup agar state tetap tersimpan (persist)
-// saat user pindah-pindah halaman.
-const predictionHistory = ref<any[]>([])
-</script>
-
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, ref } from 'vue'
 import { useTheme } from '../composables/useTheme'
 import { useSensorData } from '../composables/useSensorData'
+import { usePredictionHistory } from '../composables/usePredictionHistory'
 
 const { isDarkMode } = useTheme()
 const { sensorData, lastUpdated } = useSensorData()
+const { filteredHistory, filterLimit, addPrediction } = usePredictionHistory()
 
 // Hardcode Endpoint URL karena sudah berjalan di mesin yang sama (Lokal)
 const apiUrl = 'http://127.0.0.1:5001/predict'
@@ -20,12 +14,6 @@ const apiUrl = 'http://127.0.0.1:5001/predict'
 const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
-
-const filterLimit = ref(10)
-
-const filteredHistory = computed(() => {
-  return predictionHistory.value.slice(0, filterLimit.value)
-})
 
 let lastCallTime = 0
 
@@ -56,7 +44,7 @@ async function testPrediction() {
     result.value = res.data
 
     // Tambahkan ke riwayat prediksi
-    predictionHistory.value.unshift({
+    addPrediction({
       timestamp: new Date().toLocaleTimeString('id-ID'),
       temp: sensorData.value.temp_water,
       ph: sensorData.value.ph,
@@ -66,10 +54,6 @@ async function testPrediction() {
       do_real: sensorData.value.do
     })
 
-    // Batasi riwayat maksimal 200 data
-    if (predictionHistory.value.length > 200) {
-      predictionHistory.value.pop()
-    }
   } catch (err: any) {
     console.error("FULL FETCH ERROR:", err);
     errorMsg.value = err.message || 'Koneksi ke AI Terputus'
@@ -78,15 +62,19 @@ async function testPrediction() {
   }
 }
 
-// Gunakan lastUpdated untuk mentrigger prediksi secara akurat
-// setiap kali ada pembaruan data dari serial
+// Gunakan watch deep pada object sensorData agar 100% mendeteksi perubahan nilai.
 watch(
-  lastUpdated,
-  (newTime) => {
-    if (newTime) {
-      testPrediction()
-    }
-  }
+  () => [
+    sensorData.value.temp_water,
+    sensorData.value.ph,
+    sensorData.value.tds,
+    sensorData.value.turbidity,
+    sensorData.value.do
+  ],
+  () => {
+    testPrediction()
+  },
+  { deep: true }
 )
 </script>
 
@@ -336,8 +324,8 @@ watch(
 <style scoped>
 /* Kustomisasi scrollbar agar lebih estetis */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 14px;
+  height: 14px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -345,6 +333,8 @@ watch(
 ::-webkit-scrollbar-thumb {
   background: rgba(156, 163, 175, 0.5);
   border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 114, 128, 0.8);
