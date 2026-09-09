@@ -14,6 +14,7 @@ const apiUrl = 'http://127.0.0.1:5001/predict'
 const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
+const syncDO = ref(0) // Untuk menyamakan waktu tampil dengan AI
 
 let lastCallTime = 0
 
@@ -42,6 +43,7 @@ async function testPrediction() {
     }
     
     result.value = res.data
+    syncDO.value = sensorData.value.do // Update DO asli hanya ketika prediksi selesai
 
     // Tambahkan ke riwayat prediksi
     addPrediction({
@@ -223,7 +225,7 @@ watch(
                 <p class="text-[11px] font-bold uppercase tracking-wider mt-4" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Pembacaan DO</p>
                 <div class="flex items-baseline gap-1">
                   <p class="text-4xl font-black drop-shadow-sm" :class="isDarkMode ? 'text-sky-400' : 'text-sky-600'">
-                    {{ sensorData.do === 0 ? '-' : sensorData.do.toFixed(1) }}
+                    {{ syncDO === 0 ? '-' : syncDO.toFixed(1) }}
                   </p>
                   <span class="text-xs font-bold" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">mg/L</span>
                 </div>
