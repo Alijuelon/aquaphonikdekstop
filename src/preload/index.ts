@@ -121,6 +121,12 @@ const aquaphonikAPI = {
       }>
     > => ipcRenderer.invoke('db:get-latest-logs', limit),
 
+    saveAiPrediction: (data: any): Promise<any> =>
+      ipcRenderer.invoke('db:save-ai-prediction', data),
+
+    getAiPredictions: (limit?: number): Promise<any[]> =>
+      ipcRenderer.invoke('db:get-ai-predictions', limit),
+
     /** Get logs by date range */
     getLogsByDateRange: (
       startDate: string,

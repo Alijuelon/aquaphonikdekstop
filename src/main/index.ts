@@ -28,6 +28,8 @@ import {
   getLogsByDateRange,
   getLogCount,
   deleteOldLogs,
+  insertAiPrediction,
+  getLatestAiPredictions,
   closeDatabase
 } from './database'
 // Server: Modul komunikasi REST API dan Socket.IO dengan Flutter Mobile
@@ -150,6 +152,15 @@ function registerIpcHandlers(): void {
   // Get latest sensor logs
   ipcMain.handle('db:get-latest-logs', (_event, limit?: number) => {
     return getLatestLogs(limit)
+  })
+
+  // AI Predictions
+  ipcMain.handle('db:save-ai-prediction', (_event, data: any) => {
+    return insertAiPrediction(data)
+  })
+
+  ipcMain.handle('db:get-ai-predictions', (_event, limit?: number) => {
+    return getLatestAiPredictions(limit)
   })
 
   // Get logs by date range

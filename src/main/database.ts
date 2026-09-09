@@ -62,18 +62,36 @@ export async function initDatabase(): Promise<void> {
       oxy_status INTEGER DEFAULT 0
     )
   `
+  // Create ai_predictions table if not exists
+  const createAiTableQuery = `
+    CREATE TABLE IF NOT EXISTS ai_predictions (
+      id SERIAL PRIMARY KEY,
+      timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      temp_water REAL DEFAULT 0,
+      ph REAL DEFAULT 0,
+      tds REAL DEFAULT 0,
+      turbidity REAL DEFAULT 0,
+      do_predict REAL DEFAULT 0,
+      do_real REAL DEFAULT 0
+    )
+  `
 
   try {
     await pool.query(createTableQuery)
-    console.log('[Database] Table sensor_logs initialized')
+    await pool.query(createAiTableQuery)
+    console.log('[Database] Tables initialized')
 
     // Create index for faster timestamp queries
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_sensor_logs_timestamp
       ON sensor_logs(timestamp DESC)
     `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_ai_predictions_timestamp
+      ON ai_predictions(timestamp DESC)
+    `)
     console.log('✅ [Database] Berhasil terhubung ke PostgreSQL (Database: aquaphonik)!')
-    console.log('✅ [Database] Tabel sensor_logs siap digunakan.')
+    console.log('✅ [Database] Tabel sensor_logs & ai_predictions siap digunakan.')
   } catch (error) {
     console.error('❌ [Database] Gagal terhubung ke PostgreSQL:', error)
   }
@@ -134,6 +152,50 @@ export async function getLatestLogs(limit: number = 100): Promise<SensorLog[]> {
     return result.rows as SensorLog[]
   } catch (error) {
     console.error('[Database] Query error:', error)
+    return []
+  }
+}
+
+/**
+ * Insert AI prediction into the database
+ */
+export async function insertAiPrediction(data: any): Promise<any | null> {
+  if (!pool) return null
+  try {
+    const query = `
+      INSERT INTO ai_predictions (
+        temp_water, ph, tds, turbidity, do_predict, do_real
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6
+      ) RETURNING *
+    `
+    const values = [
+      data.temp || 0,
+      data.ph || 0,
+      data.tds || 0,
+      data.turbidity || 0,
+      data.do_predict || 0,
+      data.do_real || 0
+    ]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+  } catch (error) {
+    console.error('[Database] AI Insert error:', error)
+    return null
+  }
+}
+
+/**
+ * Get the latest AI predictions
+ */
+export async function getLatestAiPredictions(limit: number = 200): Promise<any[]> {
+  if (!pool) return []
+  try {
+    const query = 'SELECT * FROM ai_predictions ORDER BY timestamp DESC LIMIT $1'
+    const result = await pool.query(query, [limit])
+    return result.rows
+  } catch (error) {
+    console.error('[Database] AI Query error:', error)
     return []
   }
 }
