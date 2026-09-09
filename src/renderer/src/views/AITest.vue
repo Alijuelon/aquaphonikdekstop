@@ -62,19 +62,15 @@ async function testPrediction() {
   }
 }
 
-// Gunakan watch deep pada object sensorData agar 100% mendeteksi perubahan nilai.
+// Gunakan watch pada lastUpdated untuk mentrigger prediksi
+// secara akurat setiap kali ada pembaruan data dari serial (meski nilainya sama)
 watch(
-  () => [
-    sensorData.value.temp_water,
-    sensorData.value.ph,
-    sensorData.value.tds,
-    sensorData.value.turbidity,
-    sensorData.value.do
-  ],
-  () => {
-    testPrediction()
-  },
-  { deep: true }
+  lastUpdated,
+  (newTime) => {
+    if (newTime) {
+      testPrediction()
+    }
+  }
 )
 </script>
 
