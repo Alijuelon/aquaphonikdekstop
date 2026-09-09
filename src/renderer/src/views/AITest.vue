@@ -1,29 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useTheme } from '../composables/useTheme'
+import { useSensorData } from '../composables/useSensorData'
 
 const { isDarkMode } = useTheme()
+const { sensorData } = useSensorData()
 
 // Hardcode Endpoint URL karena sudah berjalan di mesin yang sama (Lokal)
 const apiUrl = 'http://127.0.0.1:5001/predict'
-
-const temp = ref<number>(0)
-const ph = ref<number>(0)
-const tds = ref<number>(0)
-const turbidity = ref<number>(0)
-const doReal = ref<number>(0)
 
 const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
 
-let removeListener: (() => void) | null = null
+const predictionHistory = ref<any[]>([])
+
 let lastCallTime = 0
 
 async function testPrediction() {
   const now = Date.now()
   if (now - lastCallTime < 1000) return 
-  if (temp.value === 0 && ph.value === 0) return 
+  if (sensorData.value.temp_water === 0 && sensorData.value.ph === 0) return 
 
   lastCallTime = now
   isLoading.value = true
@@ -32,10 +29,10 @@ async function testPrediction() {
   try {
     // @ts-ignore
     const res = await window.api.ai.predict(apiUrl, {
-      temp_water: temp.value,
-      ph: ph.value,
-      tds: tds.value,
-      turbidity: turbidity.value
+      temp_water: sensorData.value.temp_water,
+      ph: sensorData.value.ph,
+      tds: sensorData.value.tds,
+      turbidity: sensorData.value.turbidity
     })
     
     if (!res.success) {
@@ -43,6 +40,22 @@ async function testPrediction() {
     }
     
     result.value = res.data
+
+    // Tambahkan ke riwayat prediksi
+    predictionHistory.value.unshift({
+      timestamp: new Date().toLocaleTimeString('id-ID'),
+      temp: sensorData.value.temp_water,
+      ph: sensorData.value.ph,
+      tds: sensorData.value.tds,
+      turbidity: sensorData.value.turbidity,
+      do_predict: res.data.do_prediction,
+      do_real: sensorData.value.do
+    })
+
+    // Batasi riwayat maksimal 20 data
+    if (predictionHistory.value.length > 20) {
+      predictionHistory.value.pop()
+    }
   } catch (err: any) {
     console.error("FULL FETCH ERROR:", err);
     errorMsg.value = err.message || 'Koneksi ke AI Terputus'
@@ -51,24 +64,18 @@ async function testPrediction() {
   }
 }
 
-onMounted(() => {
-  // @ts-ignore
-  if (window.api && window.api.serial) {
-    // @ts-ignore
-    removeListener = window.api.serial.onData((data: any) => {
-      if (data.temp_water !== undefined) temp.value = data.temp_water
-      if (data.ph !== undefined) ph.value = data.ph
-      if (data.tds !== undefined) tds.value = data.tds
-      if (data.turbidity !== undefined) turbidity.value = data.turbidity
-      if (data.do_value !== undefined) doReal.value = data.do_value
-      testPrediction()
-    })
+// Watch perubahan nilai sensor untuk trigger prediksi AI otomatis
+watch(
+  () => [
+    sensorData.value.temp_water,
+    sensorData.value.ph,
+    sensorData.value.tds,
+    sensorData.value.turbidity
+  ],
+  () => {
+    testPrediction()
   }
-})
-
-onUnmounted(() => {
-  if (removeListener) removeListener()
-})
+)
 </script>
 
 <template>
@@ -92,7 +99,7 @@ onUnmounted(() => {
       </div>
       
       <!-- DUA KOLOM GRID (Kiri: Sensor, Kanan: Hasil Prediksi) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         
         <!-- KOLOM KIRI: 4 KOTAK SENSOR -->
         <div class="lg:col-span-7 grid grid-cols-2 gap-4 items-start">
@@ -107,7 +114,7 @@ onUnmounted(() => {
               <p class="text-sm font-semibold tracking-wide" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Suhu Air</p>
             </div>
             <p class="text-3xl font-extrabold" :class="isDarkMode ? 'text-white' : 'text-slate-800'">
-              {{ temp === 0 ? '-' : temp }} <span class="text-base font-normal text-slate-500">°C</span>
+              {{ sensorData.temp_water === 0 ? '-' : sensorData.temp_water.toFixed(1) }} <span class="text-base font-normal text-slate-500">°C</span>
             </p>
           </div>
           
@@ -121,7 +128,7 @@ onUnmounted(() => {
               <p class="text-sm font-semibold tracking-wide" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Kadar pH</p>
             </div>
             <p class="text-3xl font-extrabold" :class="isDarkMode ? 'text-white' : 'text-slate-800'">
-              {{ ph === 0 ? '-' : ph }}
+              {{ sensorData.ph === 0 ? '-' : sensorData.ph.toFixed(2) }}
             </p>
           </div>
           
@@ -137,7 +144,7 @@ onUnmounted(() => {
               <p class="text-sm font-semibold tracking-wide" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Zat Padat (TDS)</p>
             </div>
             <p class="text-3xl font-extrabold" :class="isDarkMode ? 'text-white' : 'text-slate-800'">
-              {{ tds === 0 ? '-' : tds }} <span class="text-base font-normal text-slate-500">ppm</span>
+              {{ sensorData.tds === 0 ? '-' : sensorData.tds.toFixed(0) }} <span class="text-base font-normal text-slate-500">ppm</span>
             </p>
           </div>
           
@@ -152,7 +159,7 @@ onUnmounted(() => {
               <p class="text-sm font-semibold tracking-wide" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Kekeruhan</p>
             </div>
             <p class="text-3xl font-extrabold" :class="isDarkMode ? 'text-white' : 'text-slate-800'">
-              {{ turbidity === 0 ? '-' : turbidity }} <span class="text-base font-normal text-slate-500">NTU</span>
+              {{ sensorData.turbidity === 0 ? '-' : sensorData.turbidity.toFixed(1) }} <span class="text-base font-normal text-slate-500">NTU</span>
             </p>
           </div>
           
@@ -220,7 +227,7 @@ onUnmounted(() => {
                 <p class="text-[11px] font-bold uppercase tracking-wider mt-4" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">Pembacaan DO</p>
                 <div class="flex items-baseline gap-1">
                   <p class="text-4xl font-black drop-shadow-sm" :class="isDarkMode ? 'text-sky-400' : 'text-sky-600'">
-                    {{ doReal === 0 ? '-' : doReal }}
+                    {{ sensorData.do === 0 ? '-' : sensorData.do.toFixed(1) }}
                   </p>
                   <span class="text-xs font-bold" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">mg/L</span>
                 </div>
@@ -257,9 +264,50 @@ onUnmounted(() => {
         </div>
 
       </div>
+
+      <!-- TABEL RIWAYAT PREDIKSI AI -->
+      <div class="mt-2 p-4 lg:p-6 rounded-2xl border shadow-xl flex flex-col flex-1" 
+           :class="isDarkMode ? 'bg-slate-900/80 border-white/10' : 'bg-white border-slate-200'">
+        <h2 class="text-lg font-bold mb-4" :class="isDarkMode ? 'text-white' : 'text-slate-800'">Riwayat Prediksi AI</h2>
+        <div class="overflow-x-auto rounded-xl border" :class="isDarkMode ? 'border-white/10' : 'border-slate-200'">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b bg-black/5" :class="isDarkMode ? 'border-white/10 text-slate-300' : 'border-slate-200 text-slate-600'">
+                <th class="py-3 px-4 font-semibold text-sm w-[15%]">Waktu</th>
+                <th class="py-3 px-4 font-semibold text-sm w-[45%]">Input Sensor (Suhu, pH, TDS, Kekeruhan)</th>
+                <th class="py-3 px-4 font-semibold text-sm w-[20%]">Prediksi AI (DO)</th>
+                <th class="py-3 px-4 font-semibold text-sm w-[20%]">Sensor Asli (DO)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, idx) in predictionHistory" :key="idx" 
+                  class="border-b last:border-0 hover:bg-black/5 transition-colors" 
+                  :class="isDarkMode ? 'border-white/5 text-slate-300' : 'border-slate-100 text-slate-700'">
+                <td class="py-3 px-4 text-sm whitespace-nowrap">{{ item.timestamp }}</td>
+                <td class="py-3 px-4 text-sm font-medium">
+                  {{ item.temp.toFixed(1) }}°C, {{ item.ph.toFixed(2) }} pH, {{ item.tds.toFixed(0) }} ppm, {{ item.turbidity.toFixed(1) }} NTU
+                </td>
+                <td class="py-3 px-4 text-sm font-bold" :class="isDarkMode ? 'text-neon-green' : 'text-green-600'">
+                  {{ item.do_predict }} <span class="text-xs font-normal opacity-70">mg/L</span>
+                </td>
+                <td class="py-3 px-4 text-sm font-bold" :class="isDarkMode ? 'text-sky-400' : 'text-sky-600'">
+                  {{ item.do_real.toFixed(1) }} <span class="text-xs font-normal opacity-70">mg/L</span>
+                </td>
+              </tr>
+              <tr v-if="predictionHistory.length === 0">
+                <td colspan="4" class="py-8 text-center text-sm font-medium" :class="isDarkMode ? 'text-slate-500' : 'text-slate-400'">
+                  Belum ada data prediksi yang terekam.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <style scoped>
 </style>
+
