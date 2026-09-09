@@ -1,10 +1,18 @@
+<script lang="ts">
+import { ref, computed } from 'vue'
+
+// Deklarasikan di luar script setup agar state tetap tersimpan (persist)
+// saat user pindah-pindah halaman.
+const predictionHistory = ref<any[]>([])
+</script>
+
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useTheme } from '../composables/useTheme'
 import { useSensorData } from '../composables/useSensorData'
 
 const { isDarkMode } = useTheme()
-const { sensorData } = useSensorData()
+const { sensorData, lastUpdated } = useSensorData()
 
 // Hardcode Endpoint URL karena sudah berjalan di mesin yang sama (Lokal)
 const apiUrl = 'http://127.0.0.1:5001/predict'
@@ -13,13 +21,19 @@ const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
 
-const predictionHistory = ref<any[]>([])
+const filterLimit = ref(10)
+
+const filteredHistory = computed(() => {
+  return predictionHistory.value.slice(0, filterLimit.value)
+})
 
 let lastCallTime = 0
 
 async function testPrediction() {
   const now = Date.now()
-  if (now - lastCallTime < 1000) return 
+  // Kurangi throttle menjadi 500ms agar tidak miss data dari serial (biasanya 1 detik)
+  if (now - lastCallTime < 500) return 
+  // Abaikan jika sensor belum ada data yang valid
   if (sensorData.value.temp_water === 0 && sensorData.value.ph === 0) return 
 
   lastCallTime = now
@@ -52,8 +66,8 @@ async function testPrediction() {
       do_real: sensorData.value.do
     })
 
-    // Batasi riwayat maksimal 20 data
-    if (predictionHistory.value.length > 20) {
+    // Batasi riwayat maksimal 200 data
+    if (predictionHistory.value.length > 200) {
       predictionHistory.value.pop()
     }
   } catch (err: any) {
@@ -64,16 +78,14 @@ async function testPrediction() {
   }
 }
 
-// Watch perubahan nilai sensor untuk trigger prediksi AI otomatis
+// Gunakan lastUpdated untuk mentrigger prediksi secara akurat
+// setiap kali ada pembaruan data dari serial
 watch(
-  () => [
-    sensorData.value.temp_water,
-    sensorData.value.ph,
-    sensorData.value.tds,
-    sensorData.value.turbidity
-  ],
-  () => {
-    testPrediction()
+  lastUpdated,
+  (newTime) => {
+    if (newTime) {
+      testPrediction()
+    }
   }
 )
 </script>
@@ -268,11 +280,24 @@ watch(
       <!-- TABEL RIWAYAT PREDIKSI AI -->
       <div class="mt-2 p-4 lg:p-6 rounded-2xl border shadow-xl flex flex-col flex-1" 
            :class="isDarkMode ? 'bg-slate-900/80 border-white/10' : 'bg-white border-slate-200'">
-        <h2 class="text-lg font-bold mb-4" :class="isDarkMode ? 'text-white' : 'text-slate-800'">Riwayat Prediksi AI</h2>
-        <div class="overflow-x-auto rounded-xl border" :class="isDarkMode ? 'border-white/10' : 'border-slate-200'">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b bg-black/5" :class="isDarkMode ? 'border-white/10 text-slate-300' : 'border-slate-200 text-slate-600'">
+        
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold" :class="isDarkMode ? 'text-white' : 'text-slate-800'">Riwayat Prediksi AI</h2>
+          <!-- Filter Dropdown -->
+          <select v-model="filterLimit" 
+                  class="text-sm px-3 py-1.5 rounded-lg border outline-none cursor-pointer" 
+                  :class="isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-700'">
+            <option :value="10">10 Terakhir</option>
+            <option :value="20">20 Terakhir</option>
+            <option :value="50">50 Terakhir</option>
+            <option :value="200">Semua</option>
+          </select>
+        </div>
+
+        <div class="overflow-y-auto overflow-x-auto rounded-xl border max-h-[350px]" :class="isDarkMode ? 'border-white/10' : 'border-slate-200'">
+          <table class="w-full text-left border-collapse relative">
+            <thead class="sticky top-0 z-10">
+              <tr class="border-b" :class="isDarkMode ? 'bg-slate-800 border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-600'">
                 <th class="py-3 px-4 font-semibold text-sm w-[15%]">Waktu</th>
                 <th class="py-3 px-4 font-semibold text-sm w-[45%]">Input Sensor (Suhu, pH, TDS, Kekeruhan)</th>
                 <th class="py-3 px-4 font-semibold text-sm w-[20%]">Prediksi AI (DO)</th>
@@ -280,9 +305,9 @@ watch(
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, idx) in predictionHistory" :key="idx" 
+              <tr v-for="(item, idx) in filteredHistory" :key="idx" 
                   class="border-b last:border-0 hover:bg-black/5 transition-colors" 
-                  :class="isDarkMode ? 'border-white/5 text-slate-300' : 'border-slate-100 text-slate-700'">
+                  :class="isDarkMode ? 'border-white/5 text-slate-300 bg-slate-900' : 'border-slate-100 text-slate-700 bg-white'">
                 <td class="py-3 px-4 text-sm whitespace-nowrap">{{ item.timestamp }}</td>
                 <td class="py-3 px-4 text-sm font-medium">
                   {{ item.temp.toFixed(1) }}°C, {{ item.ph.toFixed(2) }} pH, {{ item.tds.toFixed(0) }} ppm, {{ item.turbidity.toFixed(1) }} NTU
@@ -294,7 +319,7 @@ watch(
                   {{ item.do_real.toFixed(1) }} <span class="text-xs font-normal opacity-70">mg/L</span>
                 </td>
               </tr>
-              <tr v-if="predictionHistory.length === 0">
+              <tr v-if="filteredHistory.length === 0">
                 <td colspan="4" class="py-8 text-center text-sm font-medium" :class="isDarkMode ? 'text-slate-500' : 'text-slate-400'">
                   Belum ada data prediksi yang terekam.
                 </td>
@@ -309,5 +334,20 @@ watch(
 </template>
 
 <style scoped>
+/* Kustomisasi scrollbar agar lebih estetis */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
+}
 </style>
 
