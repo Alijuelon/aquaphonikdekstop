@@ -6,6 +6,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import warnings
 from sklearn.exceptions import InconsistentVersionWarning
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import datetime
 
 # Abaikan warning perbedaan versi scikit-learn
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
@@ -42,6 +45,28 @@ except Exception as e:
     print("Harap pastikan file 'virtual_sensor_do_gabungan.pkl' berada di folder yang sama.")
     # Kita tetap izinkan Flask jalan agar API merespons dengan error yang jelas
     model = None
+
+# ==============================================================================
+# GOOGLE SHEETS SETUP
+# ==============================================================================
+try:
+    print("🔄 Menghubungkan ke Google Sheets...")
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds_path = get_resource_path("credentials.json")
+    creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
+    client = gspread.authorize(creds)
+    sheet = client.open("Dataset_Akuaponik").sheet1
+
+    # (Opsional) Buat Header jika kosong
+    if not sheet.row_values(1):
+        sheet.append_row(['Timestamp', 'Suhu', 'pH', 'TDS', 'Turbidity', 'DO_Prediksi', 'DO_Asli'])
+    print("✅ Berhasil terhubung ke Google Sheets!\n")
+except Exception as e:
+    print(f"❌ Gagal menghubungkan ke Google Sheets: {e}")
+    sheet = None
 
 def rekayasa_fitur(temp, ph, tds, turbidity):
     """
@@ -84,8 +109,21 @@ def predict():
         input_df = rekayasa_fitur(sample_temp, sample_ph, sample_tds, sample_turbidity)
         hasil_prediksi = model.predict(input_df)[0]
 
+        # Ambil DO asli jika dikirim oleh sensor pembanding (default 0 jika tidak ada)
+        do_real = float(data.get('do_real', 0))
+
         status_msg = "Di bawah batas kritis (< 5.0 mg/L)!" if hasil_prediksi < 5.0 else "Kondisi Oksigen Normal."
         is_critical = bool(hasil_prediksi < 5.0)
+
+        # Simpan Langsung ke Google Drive
+        if sheet is not None:
+            try:
+                waktu_sekarang = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                baris_baru = [waktu_sekarang, sample_temp, sample_ph, sample_tds, sample_turbidity, round(float(hasil_prediksi), 2), do_real]
+                sheet.append_row(baris_baru)
+                print("✅ Data berhasil disimpan ke Google Sheets.")
+            except Exception as e:
+                print(f"⚠️ Gagal menyimpan ke Google Sheets: {e}")
 
         # Print ke terminal (console)
         print("\n" + "="*40)
