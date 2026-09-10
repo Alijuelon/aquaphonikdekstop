@@ -6,18 +6,20 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import warnings
 from sklearn.exceptions import InconsistentVersionWarning
+# pyrefly: ignore [missing-import]
 import gspread
+# pyrefly: ignore [missing-import]
 from google.oauth2.service_account import Credentials
 from datetime import datetime
+
+import os
+import sys
 
 # Abaikan warning perbedaan versi scikit-learn
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 app = Flask(__name__)
 CORS(app)
-
-import os
-import sys
 
 # ==============================================================================
 # CONFIGURATION
@@ -55,12 +57,14 @@ try:
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    creds_path = "credentials.json"
-    if not os.path.exists(creds_path):
-        creds_path = os.path.join(os.path.dirname(__file__), "credentials.json")
+    creds_path = get_resource_path("credentials.json")
     creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
     client = gspread.authorize(creds)
-    sheet = client.open("Dataset_Akuaponik").sheet1
+    
+  # Gunakan ID unik yang diambil dari tengah-tengah URL Anda
+# pyrefly: ignore [parse-error]
+    id_sheet = "1h3HiHlQ3g8YyYtP7Ta7kvek3--7dZcJifm1kYFd5pKM"
+    sheet = client.open_by_key(id_sheet).sheet1
 
     # (Opsional) Buat Header jika kosong
     if not sheet.row_values(1):
@@ -121,6 +125,7 @@ def predict():
         if sheet is not None:
             try:
                 waktu_sekarang = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                # Typo waktu_ssheeekarang sudah diperbaiki menjadi waktu_sekarang
                 baris_baru = [waktu_sekarang, sample_temp, sample_ph, sample_tds, sample_turbidity, round(float(hasil_prediksi), 2), do_real]
                 sheet.append_row(baris_baru)
                 print("✅ Data berhasil disimpan ke Google Sheets.")
@@ -162,4 +167,5 @@ def predict():
 
 if __name__ == '__main__':
     # Flask berjalan di port 5000 secara default
+    # pyrefly: ignore [name-defined]
     app.run(host='0.0.0.0', port=5001, debug=False)

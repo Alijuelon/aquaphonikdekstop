@@ -34,7 +34,8 @@ async function testPrediction() {
       temp_water: sensorData.value.temp_water,
       ph: sensorData.value.ph,
       tds: sensorData.value.tds,
-      turbidity: sensorData.value.turbidity
+      turbidity: sensorData.value.turbidity,
+      do_real: sensorData.value.do
     })
     
     if (!res.success) {
