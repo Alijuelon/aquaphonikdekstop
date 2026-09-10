@@ -55,7 +55,9 @@ try:
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    creds_path = get_resource_path("credentials.json")
+    creds_path = "credentials.json"
+    if not os.path.exists(creds_path):
+        creds_path = os.path.join(os.path.dirname(__file__), "credentials.json")
     creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
     client = gspread.authorize(creds)
     sheet = client.open("Dataset_Akuaponik").sheet1
