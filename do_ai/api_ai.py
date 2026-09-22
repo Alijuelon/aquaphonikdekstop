@@ -94,16 +94,24 @@ def rekayasa_fitur(temp, ph, tds, turbidity):
     }])
     return df
 
+@app.route('/')
+def index():
+    return jsonify({"status": "success", "message": "Aquaphonik AI Server is running"})
+
 @app.route('/predict', methods=['POST'])
+@app.route('/api/sensor', methods=['GET', 'POST'])
 def predict():
     if model is None:
         return jsonify({"status": "error", "message": "Model tidak dapat dimuat di server AI"}), 500
 
     try:
-        # Ambil data JSON dari request Express
-        data = request.json
-        if not data:
-            return jsonify({"status": "error", "message": "Body request harus berupa JSON"}), 400
+        # Ambil data JSON dari request Express atau query params
+        if request.method == 'GET':
+            data = request.args
+        else:
+            data = request.json
+            if not data:
+                return jsonify({"status": "error", "message": "Body request harus berupa JSON"}), 400
 
         # Ambil parameter
         sample_temp = float(data.get('temp_water', 0))
