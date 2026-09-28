@@ -27,6 +27,12 @@ const router = createRouter({
       name: 'ai-test',
       component: () => import('../views/AITest.vue'),
       meta: { title: 'AI Test', icon: 'science' }
+    },
+    {
+      path: '/debug',
+      name: 'debug',
+      component: () => import('../views/Debug.vue'),
+      meta: { title: 'Debug Port', icon: 'science' }
     }
   ]
 })
