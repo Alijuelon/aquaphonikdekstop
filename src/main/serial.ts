@@ -293,8 +293,12 @@ export function getStatus(): { connected: boolean; port: string } {
  * - Data terbaru selalu disimpan sehingga yang dikirim selalu yang paling aktual
  */
 function handleSerialData(rawLine: string): void {
-  // Skip empty lines or debug messages
-  if (!rawLine || !rawLine.startsWith('{')) {
+  // Skip empty lines
+  if (!rawLine) return
+
+  // Check if it's JSON
+  if (!rawLine.startsWith('{')) {
+    console.log('[Serial Raw Ignored]', rawLine)
     return
   }
 

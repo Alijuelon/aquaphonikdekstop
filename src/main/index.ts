@@ -43,6 +43,13 @@ process.on('uncaughtException', (err: any) => {
   console.error('Uncaught Exception:', err)
 })
 
+// Nonaktifkan hardware acceleration di Linux (khususnya Raspberry Pi) 
+// untuk menghindari pesan error GPU/OpenGL yang memenuhi console
+if (process.platform === 'linux') {
+  app.disableHardwareAcceleration()
+  app.commandLine.appendSwitch('disable-gpu')
+}
+
 // --- Data Logging Interval ---
 // We receive data every ~2 seconds from the MCU, but we only save to DB at a configurable interval to prevent database bloat.
 let logIntervalMinutes = 1 // Default: save every 1 minute
