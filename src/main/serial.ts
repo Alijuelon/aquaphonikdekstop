@@ -99,6 +99,11 @@ export function connectPort(
       parser = new ReadlineParser({ delimiter: '\n' })
       port.pipe(parser)
 
+      // Debug: Listen to raw unparsed bytes in case ESP32 is sending data without '\n'
+      port.on('data', (data) => {
+        console.log('[Serial RAW BUFFER]', data.toString('utf8').substring(0, 80))
+      })
+
       // Listen for parsed data (each line = one JSON payload)
       parser.on('data', (rawLine: string) => {
         handleSerialData(rawLine.trim())
