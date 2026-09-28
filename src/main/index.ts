@@ -37,6 +37,12 @@ import { initServer, publishSensorData, closeServer } from './express-api'
 // Power Manager: fitur ON/OFF tampilan aplikasi 
 import { initPowerManager, cleanupPowerManager, hideApp, isAppVisible } from './power-manager'
 
+// Ignore EIO errors on stdout/stderr (e.g. from console.log during app termination)
+process.on('uncaughtException', (err: any) => {
+  if (err.code === 'EIO') return
+  console.error('Uncaught Exception:', err)
+})
+
 // --- Data Logging Interval ---
 // We receive data every ~2 seconds from the MCU, but we only save to DB at a configurable interval to prevent database bloat.
 let logIntervalMinutes = 1 // Default: save every 1 minute
