@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useTheme } from '../composables/useTheme'
-
-const { isDarkMode } = useTheme()
-
 const props = defineProps<{
   title: string
   value: number
@@ -26,7 +22,7 @@ const percentage = computed(() => {
 })
 
 function getGlowColor(accent?: string): string {
-  const alpha = isDarkMode.value ? '0.15' : '0.08'
+  const alpha = '0.08'
   switch (accent) {
     case 'aqua': return `rgba(23, 181, 122, ${alpha})`
     case 'ocean': return `rgba(54, 150, 252, ${alpha})`
@@ -55,13 +51,13 @@ function getGlowColor(accent?: string): string {
       <div
         class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
         :class="{
-          'bg-aqua-500/20 text-aqua-500 dark:text-aqua-400': accent === 'aqua',
-          'bg-ocean-500/20 text-ocean-500 dark:text-ocean-400': accent === 'ocean',
-          'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400': accent === 'emerald',
-          'bg-rose-500/20 text-rose-600 dark:text-rose-400': accent === 'rose',
-          'bg-amber-500/20 text-amber-600 dark:text-amber-400': accent === 'amber',
-          'bg-violet-500/20 text-violet-600 dark:text-violet-400': accent === 'violet',
-          'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400': accent === 'cyan'
+          'bg-aqua-500/20 text-aqua-500': accent === 'aqua',
+          'bg-ocean-500/20 text-ocean-500': accent === 'ocean',
+          'bg-emerald-500/20 text-emerald-600': accent === 'emerald',
+          'bg-rose-500/20 text-rose-600': accent === 'rose',
+          'bg-amber-500/20 text-amber-600': accent === 'amber',
+          'bg-violet-500/20 text-violet-600': accent === 'violet',
+          'bg-cyan-500/20 text-cyan-600': accent === 'cyan'
         }"
       >
         <!-- Thermometer -->
@@ -115,20 +111,18 @@ function getGlowColor(accent?: string): string {
         </svg>
       </div>
 
-      <span class="text-xs font-semibold uppercase tracking-wider"
-            :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">{{ title }}</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ title }}</span>
     </div>
 
     <!-- Value display -->
     <div class="flex items-baseline gap-1 relative z-10 mt-1">
       <span class="sensor-value">{{ formattedValue }}</span>
-      <span class="text-sm font-medium ml-1" :class="isDarkMode ? 'text-slate-500' : 'text-slate-400'">{{ unit }}</span>
+      <span class="text-sm font-medium ml-1 text-slate-400">{{ unit }}</span>
     </div>
 
     <!-- Progress bar (optional) -->
     <div v-if="min !== undefined && max !== undefined" class="mt-4 relative z-10">
-      <div class="h-1.5 w-full rounded-full overflow-hidden"
-           :class="isDarkMode ? 'bg-slate-800' : 'bg-slate-200'">
+      <div class="h-1.5 w-full rounded-full overflow-hidden bg-slate-200">
         <div 
           class="h-full rounded-full transition-all duration-1000 ease-out"
           :class="{
@@ -144,8 +138,8 @@ function getGlowColor(accent?: string): string {
         ></div>
       </div>
       <div class="flex justify-between mt-1.5">
-        <span class="text-[10px] font-medium" :class="isDarkMode ? 'text-slate-600' : 'text-slate-400'">{{ min }}</span>
-        <span class="text-[10px] font-medium" :class="isDarkMode ? 'text-slate-600' : 'text-slate-400'">{{ max }}</span>
+        <span class="text-[10px] font-medium text-slate-400">{{ min }}</span>
+        <span class="text-[10px] font-medium text-slate-400">{{ max }}</span>
       </div>
     </div>
   </div>

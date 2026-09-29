@@ -89,6 +89,11 @@ export function connectPort(
     }
 
     try {
+      // Cleanup existing listeners if port object is being reused or replaced
+      if (port) {
+        port.removeAllListeners()
+      }
+
       port = new SerialPort({
         path: portPath,
         baudRate: baudRate,
@@ -99,10 +104,9 @@ export function connectPort(
       parser = new ReadlineParser({ delimiter: '\n' })
       port.pipe(parser)
 
-      // Debug: Listen to raw unparsed bytes in case ESP32 is sending data without '\n'
-      port.on('data', (data) => {
-        console.log('[Serial RAW BUFFER]', data.toString('utf8').substring(0, 80))
-      })
+      // Only log in dev or when troubleshooting, but remove the high-frequency spam
+      // port.on('data', (data) => { ... }) 
+
 
       // Listen for parsed data (each line = one JSON payload)
       parser.on('data', (rawLine: string) => {

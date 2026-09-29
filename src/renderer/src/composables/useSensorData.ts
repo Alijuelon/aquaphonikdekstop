@@ -81,13 +81,16 @@ const lastUpdateFormatted = computed(() => {
 /**
  * Handle incoming sensor data
  */
-function handleData(data: Record<string, number>): void {
+function handleData(data: Record<string, any>): void {
+  // Support both 'do' and 'do_value' to ensure compatibility with backend normalization
+  const doValue = data.do_value ?? data.do ?? 0;
+
   sensorData.value = {
     temp_water: data.temp_water ?? 0,
     ph: data.ph ?? 0,
     ph_volts: data.ph_volts ?? 0,
     tds: data.tds ?? 0,
-    do: data.do ?? 0,
+    do: doValue,
     turbidity: data.turbidity ?? 0,
     water_lvl: data.water_lvl ?? 0,
     co2: data.co2 ?? 0,
@@ -115,7 +118,7 @@ function handleData(data: Record<string, number>): void {
   h.temp_water.push(data.temp_water ?? 0)
   h.ph.push(data.ph ?? 0)
   h.tds.push(data.tds ?? 0)
-  h.do_val.push(data.do ?? 0)
+  h.do_val.push(doValue)
   h.temp_air.push(data.temp_air ?? 0)
   h.humidity.push(data.humidity ?? 0)
 

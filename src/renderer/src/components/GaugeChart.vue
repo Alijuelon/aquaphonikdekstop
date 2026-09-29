@@ -9,11 +9,7 @@ import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { GaugeChart as EGaugeChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
-import { useTheme } from '../composables/useTheme'
-
 use([EGaugeChart, CanvasRenderer])
-
-const { isDarkMode } = useTheme()
 
 const props = defineProps<{
   title: string
@@ -29,28 +25,14 @@ const props = defineProps<{
  * Get color based on color prop name and theme
  */
 function getColor(c?: string): string {
-  if (isDarkMode.value) {
-    // Neon colors for dark mode
-    switch (c) {
-      case 'green': return '#54ff33'
-      case 'cyan': return '#33eeff'
-      case 'amber': return '#ffbd33'
-      case 'rose': return '#ff6699'
-      case 'blue': return '#5294ff'
-      case 'violet': return '#c4a1ff'
-      default: return '#54ff33'
-    }
-  } else {
-    // Softer, richer colors for light mode
-    switch (c) {
-      case 'green': return '#10b981'
-      case 'cyan': return '#06b6d4'
-      case 'amber': return '#f59e0b'
-      case 'rose': return '#f43f5e'
-      case 'blue': return '#3b82f6'
-      case 'violet': return '#8b5cf6'
-      default: return '#10b981'
-    }
+  switch (c) {
+    case 'green': return '#10b981'
+    case 'cyan': return '#06b6d4'
+    case 'amber': return '#f59e0b'
+    case 'rose': return '#f43f5e'
+    case 'blue': return '#3b82f6'
+    case 'violet': return '#8b5cf6'
+    default: return '#10b981'
   }
 }
 
@@ -64,8 +46,8 @@ const gaugeOption = computed(() => {
   const titleFontSize = Math.max(9, Math.round(sz * 0.088))
   const lineWidth = Math.max(10, Math.round(sz * 0.125))
 
-  const trackColor = isDarkMode.value ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.08)'
-  const titleColor = isDarkMode.value ? '#ffffff' : '#334155'
+  const trackColor = 'rgba(0, 0, 0, 0.08)'
+  const titleColor = '#334155'
 
   return {
     series: [
@@ -95,7 +77,7 @@ const gaugeOption = computed(() => {
           itemStyle: {
             color: activeColor,
             shadowColor: activeColor,
-            shadowBlur: isDarkMode.value ? Math.round(sz * 0.15) : Math.round(sz * 0.06)
+            shadowBlur: Math.round(sz * 0.06)
           }
         },
         pointer: { show: false },
