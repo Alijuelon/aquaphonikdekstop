@@ -39,12 +39,12 @@ MODEL_PATH = get_resource_path('virtual_sensor_do_gabungan.pkl')
 # ML MODEL SETUP
 # ==============================================================================
 try:
-    print("🔄 Memuat model AI...")
+    print("🔄 Memuat model AI...", flush=True)
     model = joblib.load(MODEL_PATH)
-    print("✅ Model berhasil dimuat!\n")
+    print("✅ Model berhasil dimuat!\n", flush=True)
 except Exception as e:
-    print(f"❌ Gagal memuat model: {e}")
-    print("Harap pastikan file 'virtual_sensor_do_gabungan.pkl' berada di folder yang sama.")
+    print(f"❌ Gagal memuat model: {e}", flush=True)
+    print("Harap pastikan file 'virtual_sensor_do_gabungan.pkl' berada di folder yang sama.", flush=True)
     # Kita tetap izinkan Flask jalan agar API merespons dengan error yang jelas
     model = None
 
@@ -52,7 +52,7 @@ except Exception as e:
 # GOOGLE SHEETS SETUP
 # ==============================================================================
 try:
-    print("🔄 Menghubungkan ke Google Sheets...")
+    print("🔄 Menghubungkan ke Google Sheets...", flush=True)
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
@@ -69,9 +69,9 @@ try:
     # (Opsional) Buat Header jika kosong
     if not sheet.row_values(1):
         sheet.append_row(['Timestamp', 'Suhu', 'pH', 'TDS', 'Turbidity', 'DO_Prediksi', 'DO_Asli'])
-    print("✅ Berhasil terhubung ke Google Sheets!\n")
+    print("✅ Berhasil terhubung ke Google Sheets!\n", flush=True)
 except Exception as e:
-    print(f"❌ Gagal menghubungkan ke Google Sheets: {e}")
+    print(f"❌ Gagal menghubungkan ke Google Sheets: {e}", flush=True)
     sheet = None
 
 def rekayasa_fitur(temp, ph, tds, turbidity):
@@ -174,6 +174,12 @@ def predict():
         return jsonify({"status": "error", "message": f"Terjadi kesalahan internal: {str(ex)}"}), 500
 
 if __name__ == '__main__':
-    # Flask berjalan di port 5000 secara default
+    # Flask berjalan di port 5001 secara default
+    print("=" * 60, flush=True)
+    print("🚀 Aquaphonik AI Server AKTIF di http://0.0.0.0:5001", flush=True)
+    print("ℹ️ Mode: REST API Server", flush=True)
+    print("   - Menunggu kiriman data sensor via HTTP POST ke /predict", flush=True)
+    print("   - Tidak membaca port serial langsung (port Arduino Mega aman)", flush=True)
+    print("=" * 60 + "\n", flush=True)
     # pyrefly: ignore [name-defined]
     app.run(host='0.0.0.0', port=5001, debug=False)
