@@ -308,6 +308,7 @@ function handleSerialData(rawLine: string): void {
   // Check if it's JSON
   if (!rawLine.startsWith('{')) {
     console.log('[Serial Raw Ignored]', rawLine)
+    sendToRenderer('serial:error', { message: `Format Salah (Bukan JSON): ${rawLine.substring(0, 50)}` })
     return
   }
 
@@ -341,9 +342,10 @@ function handleSerialData(rawLine: string): void {
         }, remainingMs)
       }
     }
-  } catch {
+  } catch (error: any) {
     // Not valid JSON — could be debug output from MCU, ignore silently
     console.log('[Serial] Non-JSON data:', rawLine.substring(0, 80))
+    sendToRenderer('serial:error', { message: `Gagal membaca JSON: ${error.message} - ${rawLine.substring(0, 40)}` })
   }
 }
 

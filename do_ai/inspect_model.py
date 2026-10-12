@@ -2,7 +2,7 @@
 import joblib
 import pandas as pd
 
-model = joblib.load('virtual_sensor_do_gabungan.pkl')
+model = joblib.load('virtual_sensor_do_v2.pkl')
 print(type(model))
 if hasattr(model, 'feature_names_in_'):
     print("Features expected:", model.feature_names_in_)

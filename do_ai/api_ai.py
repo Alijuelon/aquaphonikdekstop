@@ -33,18 +33,18 @@ def get_resource_path(relative_path):
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
 
-MODEL_PATH = get_resource_path('virtual_sensor_do_gabungan.pkl')
+MODEL_PATH = get_resource_path('virtual_sensor_do_v2.pkl')
 
 # ==============================================================================
 # ML MODEL SETUP
 # ==============================================================================
 try:
-    print("🔄 Memuat model AI...", flush=True)
+    print("🔄 Memuat model AI (v2)...", flush=True)
     model = joblib.load(MODEL_PATH)
-    print("✅ Model berhasil dimuat!\n", flush=True)
+    print("✅ Model v2 (virtual_sensor_do_v2.pkl) berhasil dimuat!\n", flush=True)
 except Exception as e:
     print(f"❌ Gagal memuat model: {e}", flush=True)
-    print("Harap pastikan file 'virtual_sensor_do_gabungan.pkl' berada di folder yang sama.", flush=True)
+    print("Harap pastikan file 'virtual_sensor_do_v2.pkl' berada di folder yang sama.", flush=True)
     # Kita tetap izinkan Flask jalan agar API merespons dengan error yang jelas
     model = None
 

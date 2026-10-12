@@ -13,19 +13,19 @@ warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-MODEL_PATH = 'virtual_sensor_do_gabungan.pkl'
+MODEL_PATH = 'virtual_sensor_do_v2.pkl'
 BAUD_RATE = 115200
 
 # ==============================================================================
 # ML MODEL SETUP
 # ==============================================================================
 try:
-    print("🔄 Memuat model AI...")
+    print("🔄 Memuat model AI (v2)...")
     model = joblib.load(MODEL_PATH)
-    print("✅ Model berhasil dimuat!\n")
+    print("✅ Model v2 (virtual_sensor_do_v2.pkl) berhasil dimuat!\n")
 except Exception as e:
     print(f"❌ Gagal memuat model: {e}")
-    print("Harap pastikan file 'virtual_sensor_do_gabungan.pkl' berada di folder yang sama.")
+    print("Harap pastikan file 'virtual_sensor_do_v2.pkl' berada di folder yang sama.")
     exit(1)
 
 def rekayasa_fitur(temp, ph, tds, turbidity):

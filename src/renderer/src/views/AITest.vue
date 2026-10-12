@@ -13,6 +13,11 @@ const isLoading = ref(false)
 const result = ref<any>(null)
 const errorMsg = ref('')
 
+// State untuk jeda 1 detik agar hasil AI muncul duluan sebelum sensor asli
+const delayedRealDO = ref<number | null>(null)
+const isWaitingRealSensor = ref(false)
+let realDelayTimer: any = null
+
 let lastCallTime = 0
 
 async function testPrediction() {
@@ -27,20 +32,31 @@ async function testPrediction() {
   errorMsg.value = ''
   
   try {
+    const currentRealDO = sensorData.value.do
+
     // @ts-ignore
     const res = await window.api.ai.predict(apiUrl, {
       temp_water: sensorData.value.temp_water,
       ph: sensorData.value.ph,
       tds: sensorData.value.tds,
       turbidity: sensorData.value.turbidity,
-      do_real: sensorData.value.do
+      do_real: currentRealDO
     })
     
     if (!res.success) {
       throw new Error(res.error)
     }
     
+    // 1. Output AI tampil duluan secara instan
     result.value = res.data
+
+    // 2. Beri jeda 1000ms (1 detik) sebelum menampilkan sensor asli pembanding
+    isWaitingRealSensor.value = true
+    if (realDelayTimer) clearTimeout(realDelayTimer)
+    realDelayTimer = setTimeout(() => {
+      delayedRealDO.value = currentRealDO
+      isWaitingRealSensor.value = false
+    }, 1000)
 
     // Tambahkan ke riwayat prediksi
     addPrediction({
@@ -50,7 +66,7 @@ async function testPrediction() {
       tds: sensorData.value.tds,
       turbidity: sensorData.value.turbidity,
       do_predict: res.data.data.do_prediction,
-      do_real: sensorData.value.do
+      do_real: currentRealDO
     })
 
   } catch (err: any) {
@@ -210,13 +226,19 @@ watch(
                 </div>
               </div>
 
-              <!-- REAL SENSOR CARD -->
-              <div class="flex flex-col p-4 rounded-2xl shadow-inner relative overflow-hidden justify-center items-center bg-slate-50 border border-slate-200">
-                <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded bg-black/10 backdrop-blur-md text-slate-800">SENSOR ASLI</span>
+              <!-- REAL SENSOR CARD (Tampil 1 detik lebih lambat dari hasil AI) -->
+              <div class="flex flex-col p-4 rounded-2xl shadow-inner relative overflow-hidden justify-center items-center bg-slate-50 border border-slate-200 transition-all duration-300">
+                <div class="absolute top-2 left-2 flex items-center gap-1.5">
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-black/10 backdrop-blur-md text-slate-800">SENSOR ASLI</span>
+                  <span v-if="isWaitingRealSensor" class="px-1.5 py-0.5 text-[9px] font-semibold rounded bg-amber-100 text-amber-700 animate-pulse">
+                    Jeda 1 dtk...
+                  </span>
+                </div>
                 <p class="text-[11px] font-bold uppercase tracking-wider mt-4 text-slate-500">Pembacaan DO</p>
                 <div class="flex items-baseline gap-1">
-                  <p class="text-4xl font-black drop-shadow-sm text-sky-600">
-                    {{ sensorData.do === 0 ? '-' : sensorData.do.toFixed(1) }}
+                  <p class="text-4xl font-black drop-shadow-sm transition-opacity duration-300"
+                     :class="[isWaitingRealSensor ? 'opacity-40 text-slate-400' : 'text-sky-600']">
+                    {{ delayedRealDO === null || delayedRealDO === 0 ? '-' : delayedRealDO.toFixed(1) }}
                   </p>
                   <span class="text-xs font-bold text-slate-500">mg/L</span>
                 </div>
