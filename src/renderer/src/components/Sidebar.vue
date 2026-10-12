@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
   { name: 'dashboard', path: '/', icon: 'dashboard', label: 'Dashboard' },
   { name: 'history', path: '/history', icon: 'history', label: 'History' },
   { name: 'settings', path: '/settings', icon: 'settings', label: 'Settings' },
-  { name: 'ai-test', path: '/ai-test', icon: 'science', label: 'AI Test' }
+  { name: 'ai-test', path: '/ai-test', icon: 'science', label: 'DO Virtual' }
 ]
 
 const currentRoute = computed(() => route.name)

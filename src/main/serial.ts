@@ -71,6 +71,30 @@ export async function listPorts(): Promise<SerialPortInfo[]> {
 }
 
 /**
+ * Automatically scan and connect to the first available serial port on startup
+ */
+export async function autoConnectFirstAvailablePort(baudRate: number = 115200): Promise<boolean> {
+  try {
+    const ports = await listPorts()
+    if (ports.length === 0) {
+      console.log('[Serial] ⚠️ Tidak ada port serial yang terdeteksi saat startup')
+      return false
+    }
+
+    // Prioritaskan port Arduino Mega / USB serial (ttyUSB*, ttyACM*, COM*)
+    const targetPort =
+      ports.find((p) => p.path.includes('USB') || p.path.includes('ACM')) || ports[0]
+
+    console.log(`[Serial] 🚀 Auto-connecting ke port saat startup: ${targetPort.path}`)
+    const result = await connectPort(targetPort.path, baudRate)
+    return result.success
+  } catch (err) {
+    console.error('[Serial] Gagal auto-connect saat startup:', err)
+    return false
+  }
+}
+
+/**
  * Connect to a specific serial port
  */
 export function connectPort(

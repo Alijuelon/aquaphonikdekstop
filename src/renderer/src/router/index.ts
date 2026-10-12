@@ -26,7 +26,7 @@ const router = createRouter({
       path: '/ai-test',
       name: 'ai-test',
       component: () => import('../views/AITest.vue'),
-      meta: { title: 'AI Test', icon: 'science' }
+      meta: { title: 'DO Virtual', icon: 'science' }
     }
   ]
 })

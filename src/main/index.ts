@@ -19,7 +19,8 @@ import {
   sendCommand,
   getStatus,
   onData as onSerialData,
-  cleanup as serialCleanup
+  cleanup as serialCleanup,
+  autoConnectFirstAvailablePort
 } from './serial'
 import {
   initDatabase,
@@ -541,6 +542,9 @@ if (!gotTheLock) {
 
   // Create the main window
   createWindow()
+
+  // Auto-connect ke port serial pertama (Arduino) saat startup tanpa perlu klik menu setting
+  autoConnectFirstAvailablePort()
 
   // power manager: tray icon, shortcut (ctrl+alt+p) dan perangkat fisik saklar GPIO pada power-manager.ts
   initPowerManager(() => mainWindow)

@@ -99,7 +99,7 @@ watch(
             </svg>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-slate-800">Dashboard Prediksi AI</h1>
+            <h1 class="text-xl font-bold text-slate-800">Dashboard DO Virtual</h1>
             <p class="text-xs text-slate-500">Memantau kualitas air secara real-time</p>
           </div>
         </div>
