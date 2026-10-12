@@ -143,6 +143,25 @@ export function connectPort(
           reconnectAttempts = 0
 
           console.log(`[Serial] Connected to ${portPath} @ ${baudRate} baud`)
+
+          // =========================================================================
+          // DTR/RTS RESET PULSE (Sama seperti logika di monitor_sensor.py)
+          // Memastikan Arduino Mega (chip CH340) ter-reset dan tidak macet di Linux
+          // =========================================================================
+          try {
+            port?.set({ dtr: true, rts: true }, (setErr) => {
+              if (setErr) console.warn('[Serial] Warning setting DTR/RTS high:', setErr.message)
+              setTimeout(() => {
+                port?.set({ dtr: false, rts: false }, (clearErr) => {
+                  if (clearErr) console.warn('[Serial] Warning setting DTR/RTS low:', clearErr.message)
+                  console.log('[Serial] DTR reset pulse selesai (Board siap)')
+                })
+              }, 100)
+            })
+          } catch (pulseErr) {
+            console.warn('[Serial] DTR pulse error (ignored):', pulseErr)
+          }
+
           sendToRenderer('serial:status', { connected: true, port: portPath })
           resolve({ success: true, message: `Connected to ${portPath}` })
         }
@@ -307,6 +326,11 @@ function handleSerialData(rawLine: string): void {
 
   // Check if it's JSON
   if (!rawLine.startsWith('{')) {
+    // Abaikan atau log info pesan boot Arduino / Heartbeat agar tidak mengotori UI dengan error
+    if (rawLine.startsWith('###') || rawLine.includes('BOOT') || rawLine.includes('ALIVE')) {
+      console.log('[Serial Info Log]', rawLine)
+      return
+    }
     console.log('[Serial Raw Ignored]', rawLine)
     sendToRenderer('serial:error', { message: `Format Salah (Bukan JSON): ${rawLine.substring(0, 50)}` })
     return
